@@ -1,6 +1,7 @@
 {
   "name": "suilazy",
   "displayName": "Suilazy",
+  "publisher": "Suilazy",
   "description": "Extension simplify Sui contract development and deployment",
   "version": "0.0.1",
   "engines": {
@@ -17,7 +18,26 @@
         "command": "suilazy.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "suilazy",
+          "title": "Suilazy",
+          "icon": "./media/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "suilazy": [
+        {
+          "type": "webview",
+          "id": "SuilazyView",
+          "name": "Suilazy",
+          "icon": "./media/logo.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
