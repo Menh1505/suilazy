@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { ReceiveMessageHandler } from '../handlers/message.handler';
 
 export class ViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "SuilazyView";
@@ -37,7 +38,7 @@ export class ViewProvider implements vscode.WebviewViewProvider {
         };
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-        webviewView.webview.onDidReceiveMessage(async (message) => { });
+        webviewView.webview.onDidReceiveMessage(async (message) => ReceiveMessageHandler(webviewView.webview, message));
     }
 
     /**
@@ -49,6 +50,7 @@ export class ViewProvider implements vscode.WebviewViewProvider {
     private _getHtmlForWebview(webview: vscode.Webview) {
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'webview', 'build', 'assets', 'index.js'));
         const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'webview', 'build', 'assets', 'index.css'));
+
         return `
 <!DOCTYPE html>
 <html lang="en">
@@ -62,7 +64,7 @@ script-src ${webview.cspSource} 'unsafe-inline';
 style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; 
 font-src ${webview.cspSource} https://fonts.gstatic.com; 
 connect-src ${webview.cspSource} https://fullnode.devnet.aptoslabs.com;">
-    <title>MoveLazy</title>
+    <title>Suilazy</title>
     <link href="${styleUri}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 </head>

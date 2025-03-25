@@ -20,7 +20,7 @@ export default defineConfig({
     cssCodeSplit: true,
     assetsInlineLimit: 0,
   },
-  base: '/webview/',
+  base: './',
   server: {
     port: 3000,
     open: true,
