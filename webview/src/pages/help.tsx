@@ -19,14 +19,14 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { useEffect, useState } from "react";
 import { Loading } from "../components/ui/loading";
-
+import { SuiCommand } from "../utils/utils";
 
 export default function SuiHelp() {
   const navigate = useNavigate();
   const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    window.vscode.postMessage({ command: "sui.version" });
+    window.vscode.postMessage({ command: SuiCommand.Version });
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
       if (message.type === 'cliStatus' && message.status === 'error') {
@@ -85,7 +85,7 @@ export default function SuiHelp() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
-              onClick={() => navigate("/aptos/move")}
+              onClick={() => navigate("/move")}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
