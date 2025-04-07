@@ -1,18 +1,29 @@
 import { promisify } from "util";
 import { exec } from 'child_process';
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 const execAsync = promisify(exec);
 
+// Keep track of current project directory
+let currentProjectDir: string | null = null;
+
+interface VersionInfo {
+    version: string;
+    warnings?: string[];
+}
+
 async function getWorkingDirectory(): Promise<string> {
-    // First try to get workspace folder
+    if (currentProjectDir) {
+        return currentProjectDir;
+    }
+
     const workspaceFolders = vscode.workspace.workspaceFolders;
     
     if (workspaceFolders && workspaceFolders.length > 0) {
         return workspaceFolders[0].uri.fsPath;
     }
 
-    // If no workspace folder, prompt user to select a folder
     const folderUri = await vscode.window.showOpenDialog({
         canSelectFolders: true,
         canSelectFiles: false,
@@ -27,27 +38,57 @@ async function getWorkingDirectory(): Promise<string> {
     throw new Error('Please select a working directory');
 }
 
-export async function SuiVersion(): Promise<String> {
+export async function setCurrentProjectDir(projectName: string, parentDir: string) {
+    currentProjectDir = path.join(parentDir, projectName);
+    console.log("Set current project directory to:", currentProjectDir);
+}
+
+export async function SuiVersion(): Promise<VersionInfo> {
     try {
         const { stdout, stderr } = await execAsync('sui --version');
-        return stdout + stderr ;
+        return {
+            version: stdout.trim(),
+            warnings: stderr ? [stderr.trim()] : undefined
+        };
     } catch (error) {
-        return 'not found';
+        return { version: 'not found' };
+    }
+}
+
+// Add version check function
+async function checkVersionCompatibility(): Promise<string[]> {
+    try {
+        const { stderr } = await execAsync('sui client publish --dry-run');
+        const warnings: string[] = [];
+        if (stderr) {
+            const lines = stderr.split('\n');
+            lines.forEach(line => {
+                if (line.includes('[warning]')) {
+                    warnings.push(line.replace('[warning]', '').trim());
+                }
+            });
+        }
+        return warnings;
+    } catch (error: any) {
+        return [];
     }
 }
 
 export async function SuiMoveNew(projectName: string): Promise<string> {
-    const workingDir = await getWorkingDirectory();
-    console.log("Working directory:", workingDir);
+    const parentDir = await getWorkingDirectory();
+    console.log("Parent directory:", parentDir);
     
     try {
         const { stdout, stderr } = await execAsync(`sui move new ${projectName}`, {
-            cwd: workingDir
+            cwd: parentDir
         });
         
         if (stderr && !stderr.includes('Creating')) {
             throw new Error(stderr);
         }
+
+        // Set current project directory after successful creation
+        await setCurrentProjectDir(projectName, parentDir);
         
         return stdout || "Project created successfully";
     } catch (error: any) {
@@ -57,12 +98,14 @@ export async function SuiMoveNew(projectName: string): Promise<string> {
 }
 
 export async function SuiMoveBuild(): Promise<string> {
-    const workingDir = await getWorkingDirectory();
-    console.log("Working directory:", workingDir);
+    if (!currentProjectDir) {
+        throw new Error('No active project directory. Please create or open a project first.');
+    }
     
+    console.log("Building in directory:", currentProjectDir);
     try {
         const { stdout, stderr } = await execAsync('sui move build', {
-            cwd: workingDir
+            cwd: currentProjectDir
         });
         if (stderr) {
             throw new Error(stderr);
@@ -74,12 +117,14 @@ export async function SuiMoveBuild(): Promise<string> {
 }
 
 export async function SuiMoveTest(): Promise<string> {
-    const workingDir = await getWorkingDirectory();
-    console.log("Working directory:", workingDir);
+    if (!currentProjectDir) {
+        throw new Error('No active project directory. Please create or open a project first.');
+    }
     
+    console.log("Testing in directory:", currentProjectDir);
     try {
         const { stdout, stderr } = await execAsync('sui move test', {
-            cwd: workingDir
+            cwd: currentProjectDir
         });
         if (stderr) {
             throw new Error(stderr);
@@ -91,18 +136,45 @@ export async function SuiMoveTest(): Promise<string> {
 }
 
 export async function SuiMovePublish(): Promise<string> {
-    const workingDir = await getWorkingDirectory();
-    console.log("Working directory:", workingDir);
+    if (!currentProjectDir) {
+        throw new Error('No active project directory. Please create or open a project first.');
+    }
     
+    // Check version compatibility first
+    const warnings = await checkVersionCompatibility();
+    
+    console.log("Publishing from directory:", currentProjectDir);
     try {
         const { stdout, stderr } = await execAsync('sui client publish --gas-budget 100000000', {
-            cwd: workingDir
+            cwd: currentProjectDir
         });
-        if (stderr) {
-            throw new Error(stderr);
+        
+        // Include warnings in the success message if they exist
+        if (warnings.length > 0) {
+            return `${stdout}\n\nWarnings:\n${warnings.join('\n')}`;
         }
+        
         return stdout;
     } catch (error: any) {
-        throw new Error(`Failed to publish Move project: ${error.message}`);
+        const errorMsg = error.message || 'Unknown error';
+        if (warnings.length > 0) {
+            throw new Error(`Failed to publish Move project. \n\nWarnings:\n${warnings.join('\n')}\n\nError:\n${errorMsg}`);
+        }
+        throw new Error(`Failed to publish Move project: ${errorMsg}`);
+    }
+}
+
+export async function SuiUpdateCli(): Promise<string> {
+    try {
+        // For Linux/MacOS
+        const { stdout, stderr } = await execAsync('cargo install --locked --git https://github.com/MystenLabs/sui.git --branch devnet sui');
+        
+        if (stderr) {
+            console.log("Update stderr:", stderr);
+        }
+        
+        return "Sui CLI updated successfully. Please restart VS Code.";
+    } catch (error: any) {
+        throw new Error(`Failed to update Sui CLI: ${error.message}`);
     }
 }

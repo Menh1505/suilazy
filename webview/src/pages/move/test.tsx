@@ -1,10 +1,35 @@
+import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { SuiCommand } from "../../utils/utils";
 import { BackButton } from "../../components/ui/back-button";
+import { ResultDisplay } from "../../components/ui/result-display";
 
 export default function MoveTest() {
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.type === "moveStatus") {
+        if (message.status === "success") {
+          setResult(message.message);
+          setError(null);
+        } else {
+          setError(message.message);
+          setResult(null);
+        }
+      }
+    };
+
+    window.addEventListener("message", messageHandler);
+    return () => window.removeEventListener("message", messageHandler);
+  }, []);
+
   const handleTest = () => {
+    setResult(null);
+    setError(null);
     window.vscode.postMessage({ command: SuiCommand.MOVE_TEST });
   };
 
@@ -19,6 +44,7 @@ export default function MoveTest() {
         >
           Test Project
         </Button>
+        <ResultDisplay result={result} error={error} />
       </CardContent>
     </Card>
   );

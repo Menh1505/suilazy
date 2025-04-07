@@ -8,7 +8,7 @@ export async function HandleMoveNew(webview: vscode.Webview, data: { projectName
         webview.postMessage({ 
             type: "moveStatus", 
             status: "success", 
-            message: `Project "${data.projectName}" created successfully. ${result}` 
+            message: `Project "${data.projectName}" created and set as active project. ${result}` 
         });
     } catch (error: any) {
         console.error("MoveNew error:", error);
@@ -24,11 +24,18 @@ export async function HandleMoveBuild(webview: vscode.Webview) {
     console.log("Handling MoveBuild");
     try {
         const result = await SuiMoveBuild();
-        console.log("MoveBuild success:", result);
-        webview.postMessage({ type: "moveStatus", status: "success", message: result });
+        webview.postMessage({ 
+            type: "moveStatus", 
+            status: "success", 
+            message: `Build completed successfully. ${result}` 
+        });
     } catch (error: any) {
         console.error("MoveBuild error:", error.message);
-        webview.postMessage({ type: "moveStatus", status: "error", message: error.message });
+        webview.postMessage({ 
+            type: "moveStatus", 
+            status: "error", 
+            message: error.message 
+        });
     }
 }
 
@@ -37,10 +44,18 @@ export async function HandleMoveTest(webview: vscode.Webview) {
     try {
         const result = await SuiMoveTest();
         console.log("MoveTest success:", result);
-        webview.postMessage({ type: "moveStatus", status: "success", message: result });
+        webview.postMessage({ 
+            type: "moveStatus", 
+            status: "success", 
+            message: `Test completed successfully. ${result}` 
+        });
     } catch (error: any) {
         console.error("MoveTest error:", error.message);
-        webview.postMessage({ type: "moveStatus", status: "error", message: error.message });
+        webview.postMessage({ 
+            type: "moveStatus", 
+            status: "error", 
+            message: error.message 
+        });
     }
 }
 
@@ -49,9 +64,17 @@ export async function HandleMovePublish(webview: vscode.Webview) {
     try {
         const result = await SuiMovePublish();
         console.log("MovePublish success:", result);
-        webview.postMessage({ type: "moveStatus", status: "success", message: result });
+        webview.postMessage({ 
+            type: "moveStatus", 
+            status: "success", 
+            message: `Publish completed successfully. ${result}` 
+        });
     } catch (error: any) {
         console.error("MovePublish error:", error.message);
-        webview.postMessage({ type: "moveStatus", status: "error", message: error.message });
+        webview.postMessage({ 
+            type: "moveStatus", 
+            status: "error", 
+            message: error.message 
+        });
     }
 }
