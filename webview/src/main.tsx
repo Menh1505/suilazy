@@ -10,6 +10,7 @@ import MoveInit from './pages/move/init';
 import MoveBuild from './pages/move/build';
 import MoveTest from './pages/move/test';
 import MoveDeploy from './pages/move/deploy';
+import Network from './pages/network.tsx';
 
 const router = createMemoryRouter([
   {
@@ -43,7 +44,11 @@ const router = createMemoryRouter([
   {
     path: 'move/test', 
     element: <MoveTest />
-  }
+  },
+  {
+    path: 'network', 
+    element: <Network />,
+  },
 ]);
 
 createRoot(document.getElementById('root')!).render(

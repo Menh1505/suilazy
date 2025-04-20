@@ -4,7 +4,10 @@ export type SuiCommandType = {
     MOVE_BUILD: "sui.move.build";
     MOVE_TEST: "sui.move.test";
     MOVE_PUBLISH: "sui.move.publish";
-    UPDATE_CLI: "sui.update"
+    UPDATE_CLI: "sui.update";
+    CLIENT_ENVS: "sui.client.envs";
+    CLIENT_SWITCH: "sui.client.switch";
+    CLIENT_NEW_ENV: "sui.client.new-env"
 };
 
 export const SuiCommand: SuiCommandType = {
@@ -13,5 +16,8 @@ export const SuiCommand: SuiCommandType = {
     MOVE_BUILD: "sui.move.build",
     MOVE_TEST: "sui.move.test",
     MOVE_PUBLISH: "sui.move.publish",
-    UPDATE_CLI: "sui.update"
+    UPDATE_CLI: "sui.update",
+    CLIENT_ENVS: "sui.client.envs",
+    CLIENT_SWITCH: "sui.client.switch",
+    CLIENT_NEW_ENV: "sui.client.new-env",
 } as const;
