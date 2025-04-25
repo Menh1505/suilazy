@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
 
-export default function SuiMove() {
+export default function MoveHelp() {
   const navigate = useNavigate();
 
   return (
@@ -21,16 +21,16 @@ export default function SuiMove() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
-              onClick={() => navigate("/move/init")}
+              onClick={() => navigate("/move/new")}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
-              Move Init
+              Move New
             </Button>
 
             <Button
               onClick={() => navigate("/move/build")}
-              variant="outline" 
+              variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
               Move Build
@@ -38,13 +38,13 @@ export default function SuiMove() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
-            <Button
-              onClick={() => navigate("/move/deploy")}
+            {/* <Button
+              onClick={() => navigate("/sui/move/deploy")}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
               Move Deploy
-            </Button>
+            </Button> */}
 
             <Button
               onClick={() => navigate("/move/test")}

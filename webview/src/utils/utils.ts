@@ -1,12 +1,12 @@
-import { CommandValues, SuiCommand } from "../types/move/command.type";
+import { SuiCommandValues, SuiCommand } from "../types/move/command.type";
 
 type SuiMessage = {
-    command: CommandValues; 
-    data?: unknown;         
+  command: SuiCommandValues;
+  data?: unknown;
 };
 
 export interface vscodeApi {
-    postMessage(message: SuiMessage): void;
+  postMessage(message: SuiMessage): void;
 }
 
-export { SuiCommand }; 
+export { SuiCommand };

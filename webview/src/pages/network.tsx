@@ -131,11 +131,10 @@ export default function Network() {
                   <div
                     key={env.alias}
                     onClick={() => switchEnvironment(env.alias)}
-                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                      env.alias === activeEnv
+                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${env.alias === activeEnv
                         ? "border-blue-500 bg-blue-500/10"
                         : "border-gray-700 hover:border-gray-600"
-                    }`}
+                      }`}
                   >
                     <div className="flex justify-between items-center">
                       <div>
