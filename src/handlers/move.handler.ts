@@ -7,23 +7,16 @@ import {
 } from "../services/sui.service";
 import { MoveInitRequest } from "../types/move/init.type";
 import { getWorkSpacePath } from "../utils/path";
+import { validateWorkspace } from "../utils/workspace.check";
 
 export async function HandleMoveNew(
   webview: vscode.Webview,
   data: MoveInitRequest
 ) {
   console.log("Handling MoveNew", data);
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
-    webview.postMessage({
-      type: "moveStatus",
-      status: "error",
-      message:
-        "No workspace open. Please open a workspace before creating a project.",
-    });
+  if (validateWorkspace(webview) === false) {
     return;
   }
-
   try {
     const result = await SuiMoveNew(data);
     console.log("MoveNew success:", result);
