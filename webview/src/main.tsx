@@ -12,6 +12,7 @@ import CliNotFound from './pages/installation/cliNotFound.tsx';
 import MoveNew from './pages/sui_move/new.tsx';
 import SuiMove from './pages/sui_move/index.tsx';
 import MoveHelp from './pages/sui_move/help.tsx';
+import MoveDeploy from './pages/sui_client/deploy.tsx';
 import MoveBuild from './pages/sui_move/build.tsx';
 
 
@@ -52,11 +53,11 @@ const router = createMemoryRouter([
           {
             path: "test",
             element: <MoveTest />
+          },
+          {
+            path: "deploy",
+            element: <MoveDeploy />
           }
-          // {
-          //   path: "deploy",
-          //   element: <MoveDeploy />
-          // }
         ]
       },
       {
