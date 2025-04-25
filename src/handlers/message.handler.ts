@@ -37,7 +37,7 @@ export function ReceiveMessageHandler(
       }
       break;
     case SuiCommand.MOVE_BUILD:
-      HandleMoveBuild(webview);
+      HandleMoveBuild(webview, message.data);
       break;
     case SuiCommand.MOVE_TEST:
       HandleMoveTest(webview);

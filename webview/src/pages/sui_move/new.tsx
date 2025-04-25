@@ -471,7 +471,7 @@ export default function MoveNew() {
         errorTitle="Initialization Failed"
         successAction={{
           label: "Go to build",
-          onClick: () => navigate("move/build"),
+          onClick: () => navigate("/move/build"),
         }}
       />
     </div>

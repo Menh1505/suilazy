@@ -1,6 +1,6 @@
 // Importing React, a utility function 'cn', and class-variance-authority (CVA) for managing dynamic CSS classes
 import * as React from "react"
-import { cn } from "./utils"
+import { cn } from "../../lib/utils"
 import { cva, type VariantProps } from "class-variance-authority"
 
 /* Class-variance-authority (CVA) is a JavaScript/TypeScript library that helps you create and manage dynamic CSS classes in a clear, structured, and maintainable way.

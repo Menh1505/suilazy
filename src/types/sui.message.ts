@@ -7,7 +7,7 @@ export interface SuiMessage {
 
 export interface SuiResponse {
   type: "cliStatus" | "moveStatus";
-  status: "success" | "error";
+  status: "success" | "error" | "warning";
   message: string;
 }
 

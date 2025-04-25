@@ -1,5 +1,5 @@
 export interface MoveInitRequest {
-  projectName: string;
+  projectName?: string;
   packagePath?: string;
   options: {
     dev: boolean;

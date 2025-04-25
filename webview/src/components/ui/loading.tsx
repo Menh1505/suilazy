@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "./utils"
+import { cn } from "../../lib/utils"
 import { cva, type VariantProps } from "class-variance-authority"
 
 // Defining loadingVariants using CVA to manage dynamic CSS classes for the Loading component

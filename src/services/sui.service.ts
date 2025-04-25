@@ -5,6 +5,7 @@ import * as path from "path";
 import { MoveInitRequest } from "../types/move/init.type";
 import processCLI from "./excute";
 import { getWorkSpacePath } from "../utils/path";
+import { getCurrentWorkspaceFolder } from "../utils/workspace.manager";
 
 const execAsync = promisify(exec);
 
@@ -154,38 +155,105 @@ export async function SuiMoveNew(data: MoveInitRequest): Promise<string> {
     throw new Error(`Sui move failed: ${error}`);
   }
 }
-export async function SuiMoveBuild(): Promise<string> {
-  if (!currentProjectDir) {
-    throw new Error(
-      "No active project directory. Please create or open a project first."
-    );
+
+export async function SuiMoveBuild(
+  webview: vscode.Webview,
+  data: MoveInitRequest
+): Promise<string> {
+  const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
+  console.log("Handling MoveBuild:", workspacePath);
+
+  if (!workspacePath) {
+    throw new Error(message || "No workspace path found.");
   }
 
-  console.log("Building in directory:", currentProjectDir);
+  const { packagePath, options } = data;
+
+  // Build command string with options
+  const command = "sui";
+  const cmdArgs: string[] = ["move", "build"];
+
+  // Add package path if specified
+  if (packagePath) {
+    cmdArgs.push(`--package-path "${packagePath}"`);
+  }
+
+  // Add all options
+  if (options.dev) {
+    cmdArgs.push("--dev");
+  }
+  if (options.test) {
+    cmdArgs.push("--test");
+  }
+  if (options.doc) {
+    cmdArgs.push("--doc");
+  }
+  if (options.disassemble) {
+    cmdArgs.push("--disassemble");
+  }
+  if (options.installDir) {
+    cmdArgs.push(`--install-dir "${options.installDir}"`);
+  }
+  if (options.force) {
+    cmdArgs.push("--force");
+  }
+  if (options.fetchDepsOnly) {
+    cmdArgs.push("--fetch-deps-only");
+  }
+  if (options.skipFetchLatestGitDeps) {
+    cmdArgs.push("--skip-fetch-latest-git-deps");
+  }
+  if (options.defaultMoveFlavor) {
+    cmdArgs.push(`--default-move-flavor "${options.defaultMoveFlavor}"`);
+  }
+  if (options.defaultMoveEdition) {
+    cmdArgs.push(`--default-move-edition "${options.defaultMoveEdition}"`);
+  }
+  if (options.dependenciesAreRoot) {
+    cmdArgs.push("--dependencies-are-root");
+  }
+  if (options.silenceWarnings) {
+    cmdArgs.push("--silence-warnings");
+  }
+  if (options.warningsAreErrors) {
+    cmdArgs.push("--warnings-are-errors");
+  }
+  if (options.jsonErrors) {
+    cmdArgs.push("--json-errors");
+  }
+  if (options.noLint) {
+    cmdArgs.push("--no-lint");
+  }
+  if (options.lint) {
+    cmdArgs.push("--lint");
+  }
+
+  console.log("Executing command:", command, cmdArgs.join(" "));
+
   try {
-    const { stdout, stderr } = await execAsync("sui move build", {
-      cwd: currentProjectDir,
+    const output = await processCLI(command, cmdArgs, workspacePath);
+    console.log("✅ CLI output:", output);
+    return output;
+  } catch (error) {
+    console.error("❌ CLI error:", error);
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: `Sui move build failed: ${error}`,
     });
-    if (stderr) {
-      throw new Error(stderr);
-    }
-    return stdout;
-  } catch (error: any) {
-    throw new Error(`Failed to build Move project: ${error.message}`);
+    throw new Error(`Sui move build failed: ${error}`);
   }
 }
 
-export async function SuiMoveTest(): Promise<string> {
-  if (!currentProjectDir) {
-    throw new Error(
-      "No active project directory. Please create or open a project first."
-    );
+export async function SuiMoveTest(webview: vscode.Webview): Promise<string> {
+  const workspacePath = getCurrentWorkspaceFolder(webview);
+  if (!workspacePath) {
+    return "Please open a file in your target folder first";
   }
 
-  console.log("Testing in directory:", currentProjectDir);
   try {
     const { stdout, stderr } = await execAsync("sui move test", {
-      cwd: currentProjectDir,
+      // cwd: workspacePath,
     });
     if (stderr) {
       throw new Error(stderr);
@@ -196,30 +264,23 @@ export async function SuiMoveTest(): Promise<string> {
   }
 }
 
-export async function SuiMovePublish(): Promise<string> {
-  if (!currentProjectDir) {
-    throw new Error(
-      "No active project directory. Please create or open a project first."
-    );
+export async function SuiMovePublish(webview: vscode.Webview): Promise<string> {
+  const workspacePath = getCurrentWorkspaceFolder(webview);
+  if (!workspacePath) {
+    return "Please open a file in your target folder first";
   }
 
-  // Check version compatibility first
   const warnings = await checkVersionCompatibility();
 
-  console.log("Publishing from directory:", currentProjectDir);
   try {
     const { stdout, stderr } = await execAsync(
-      "sui client publish --gas-budget 100000000",
-      {
-        cwd: currentProjectDir,
-      }
+      "sui client publish --gas-budget 100000000"
+      // { cwd: workspacePath }
     );
 
-    // Include warnings in the success message if they exist
     if (warnings.length > 0) {
       return `${stdout}\n\nWarnings:\n${warnings.join("\n")}`;
     }
-
     return stdout;
   } catch (error: any) {
     const errorMsg = error.message || "Unknown error";

@@ -1,6 +1,6 @@
 // Importing React and a utility function 'cn' from a local utils file
 import * as React from "react"
-import { cn } from "./utils"
+import { cn } from "../../lib/utils"
 
 // Defining a Card component using React.forwardRef to pass refs to the underlying div element
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (

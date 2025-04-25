@@ -36,10 +36,16 @@ export async function HandleMoveNew(
   }
 }
 
-export async function HandleMoveBuild(webview: vscode.Webview) {
+export async function HandleMoveBuild(
+  webview: vscode.Webview,
+  data: MoveInitRequest
+) {
   console.log("Handling MoveBuild");
+  if (validateWorkspace(webview) === false) {
+    return;
+  }
   try {
-    const result = await SuiMoveBuild();
+    const result = await SuiMoveBuild(webview, data);
     webview.postMessage({
       type: "moveStatus",
       status: "success",
@@ -58,7 +64,7 @@ export async function HandleMoveBuild(webview: vscode.Webview) {
 export async function HandleMoveTest(webview: vscode.Webview) {
   console.log("Handling MoveTest");
   try {
-    const result = await SuiMoveTest();
+    const result = await SuiMoveTest(webview);
     console.log("MoveTest success:", result);
     webview.postMessage({
       type: "moveStatus",
@@ -78,7 +84,7 @@ export async function HandleMoveTest(webview: vscode.Webview) {
 export async function HandleMovePublish(webview: vscode.Webview) {
   console.log("Handling MovePublish");
   try {
-    const result = await SuiMovePublish();
+    const result = await SuiMovePublish(webview);
     console.log("MovePublish success:", result);
     webview.postMessage({
       type: "moveStatus",

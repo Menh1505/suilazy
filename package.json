@@ -63,5 +63,9 @@
     "webpack-cli": "^6.0.1",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1"
+  },
+  "dependencies": {
+    "@radix-ui/react-separator": "^1.1.4",
+    "@radix-ui/react-switch": "^1.2.2"
   }
 }

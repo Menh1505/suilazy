@@ -4,7 +4,6 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import './index.css'
 import App from './App.tsx'
 import SuiHelp from './pages/sui_help/index.tsx';
-import MoveBuild from './pages/sui_move/build.tsx';
 import MoveTest from './pages/sui_move/test.tsx';
 // import MoveDeploy from './pages/sui_client/deploy.tsx';
 import Network from './pages/network.tsx';
@@ -13,6 +12,7 @@ import CliNotFound from './pages/installation/cliNotFound.tsx';
 import MoveNew from './pages/sui_move/new.tsx';
 import SuiMove from './pages/sui_move/index.tsx';
 import MoveHelp from './pages/sui_move/help.tsx';
+import MoveBuild from './pages/sui_move/build.tsx';
 
 
 
