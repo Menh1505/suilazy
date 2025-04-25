@@ -1,7 +1,10 @@
 import { promisify } from "util";
-import { exec } from 'child_process';
-import * as vscode from 'vscode';
-import * as path from 'path';
+import { exec } from "child_process";
+import * as vscode from "vscode";
+import * as path from "path";
+import { MoveInitRequest } from "../types/move/init.type";
+import processCLI from "./excute";
+import { getWorkSpacePath } from "../utils/path";
 
 const execAsync = promisify(exec);
 
@@ -9,218 +12,291 @@ const execAsync = promisify(exec);
 let currentProjectDir: string | null = null;
 
 interface VersionInfo {
-    version: string;
-    warnings?: string[];
+  version: string;
+  warnings?: string[];
 }
 
 async function getWorkingDirectory(): Promise<string> {
-    if (currentProjectDir) {
-        return currentProjectDir;
-    }
+  if (currentProjectDir) {
+    return currentProjectDir;
+  }
 
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    
-    if (workspaceFolders && workspaceFolders.length > 0) {
-        return workspaceFolders[0].uri.fsPath;
-    }
+  const workspaceFolders = vscode.workspace.workspaceFolders;
 
-    const folderUri = await vscode.window.showOpenDialog({
-        canSelectFolders: true,
-        canSelectFiles: false,
-        canSelectMany: false,
-        title: 'Select Working Directory'
-    });
+  if (workspaceFolders && workspaceFolders.length > 0) {
+    return workspaceFolders[0].uri.fsPath;
+  }
 
-    if (folderUri && folderUri.length > 0) {
-        return folderUri[0].fsPath;
-    }
+  const folderUri = await vscode.window.showOpenDialog({
+    canSelectFolders: true,
+    canSelectFiles: false,
+    canSelectMany: false,
+    title: "Select Working Directory",
+  });
 
-    throw new Error('Please select a working directory');
+  if (folderUri && folderUri.length > 0) {
+    return folderUri[0].fsPath;
+  }
+
+  throw new Error("Please select a working directory");
 }
 
-export async function setCurrentProjectDir(projectName: string, parentDir: string) {
-    currentProjectDir = path.join(parentDir, projectName);
-    console.log("Set current project directory to:", currentProjectDir);
+export async function setCurrentProjectDir(
+  projectName: string,
+  parentDir: string
+) {
+  currentProjectDir = path.join(parentDir, projectName);
+  console.log("Set current project directory to:", currentProjectDir);
 }
 
 export async function SuiVersion(): Promise<VersionInfo> {
-    try {
-        const { stdout, stderr } = await execAsync('sui --version');
-        return {
-            version: stdout.trim(),
-            warnings: stderr ? [stderr.trim()] : undefined
-        };
-    } catch (error) {
-        return { version: 'not found' };
-    }
+  try {
+    const { stdout, stderr } = await execAsync("sui --version");
+    return {
+      version: stdout.trim(),
+      warnings: stderr ? [stderr.trim()] : undefined,
+    };
+  } catch (error) {
+    return { version: "not found" };
+  }
 }
 
 // Add version check function
 async function checkVersionCompatibility(): Promise<string[]> {
-    try {
-        const { stderr } = await execAsync('sui client publish --dry-run');
-        const warnings: string[] = [];
-        if (stderr) {
-            const lines = stderr.split('\n');
-            lines.forEach(line => {
-                if (line.includes('[warning]')) {
-                    warnings.push(line.replace('[warning]', '').trim());
-                }
-            });
+  try {
+    const { stderr } = await execAsync("sui client publish --dry-run");
+    const warnings: string[] = [];
+    if (stderr) {
+      const lines = stderr.split("\n");
+      lines.forEach((line) => {
+        if (line.includes("[warning]")) {
+          warnings.push(line.replace("[warning]", "").trim());
         }
-        return warnings;
-    } catch (error: any) {
-        return [];
+      });
     }
+    return warnings;
+  } catch (error: any) {
+    return [];
+  }
 }
 
-export async function SuiMoveNew(projectName: string): Promise<string> {
-    const parentDir = await getWorkingDirectory();
-    console.log("Parent directory:", parentDir);
-    
-    try {
-        const { stdout, stderr } = await execAsync(`sui move new ${projectName}`, {
-            cwd: parentDir
-        });
-        
-        if (stderr && !stderr.includes('Creating')) {
-            throw new Error(stderr);
-        }
+export async function SuiMoveNew(data: MoveInitRequest): Promise<string> {
+  const workspacePath = getWorkSpacePath();
+  const { projectName, packagePath, options } = data;
 
-        // Set current project directory after successful creation
-        await setCurrentProjectDir(projectName, parentDir);
-        
-        return stdout || "Project created successfully";
-    } catch (error: any) {
-        console.error("Error creating project:", error);
-        throw new Error(`Failed to create Move project: ${error.message}`);
-    }
+  // Build command string with options
+  const command = "sui";
+  const cmdArgs: string[] = ["move", "new", projectName];
+
+  // Add package path if specified
+  if (packagePath) {
+    cmdArgs.push(`--package-path "${packagePath}"`);
+  }
+
+  // Add all options
+  if (options.dev) {
+    cmdArgs.push("--dev");
+  }
+  if (options.test) {
+    cmdArgs.push("--test");
+  }
+  if (options.doc) {
+    cmdArgs.push("--doc");
+  }
+  if (options.disassemble) {
+    cmdArgs.push("--disassemble");
+  }
+  if (options.installDir) {
+    cmdArgs.push(`--install-dir "${options.installDir}"`);
+  }
+  if (options.force) {
+    cmdArgs.push("--force");
+  }
+  if (options.fetchDepsOnly) {
+    cmdArgs.push("--fetch-deps-only");
+  }
+  if (options.skipFetchLatestGitDeps) {
+    cmdArgs.push("--skip-fetch-latest-git-deps");
+  }
+  if (options.defaultMoveFlavor) {
+    cmdArgs.push(`--default-move-flavor "${options.defaultMoveFlavor}"`);
+  }
+  if (options.defaultMoveEdition) {
+    cmdArgs.push(`--default-move-edition "${options.defaultMoveEdition}"`);
+  }
+  if (options.dependenciesAreRoot) {
+    cmdArgs.push("--dependencies-are-root");
+  }
+  if (options.silenceWarnings) {
+    cmdArgs.push("--silence-warnings");
+  }
+  if (options.warningsAreErrors) {
+    cmdArgs.push("--warnings-are-errors");
+  }
+  if (options.jsonErrors) {
+    cmdArgs.push("--json-errors");
+  }
+  if (options.noLint) {
+    cmdArgs.push("--no-lint");
+  }
+  if (options.lint) {
+    cmdArgs.push("--lint");
+  }
+
+  console.log("Executing command:", command, cmdArgs.join(" "));
+
+  try {
+    const output = await processCLI(command, cmdArgs, workspacePath);
+    console.log("✅ CLI output:", output);
+    return output;
+  } catch (error) {
+    console.error("❌ CLI error:", error);
+    throw new Error(`Sui move failed: ${error}`);
+  }
 }
-
 export async function SuiMoveBuild(): Promise<string> {
-    if (!currentProjectDir) {
-        throw new Error('No active project directory. Please create or open a project first.');
+  if (!currentProjectDir) {
+    throw new Error(
+      "No active project directory. Please create or open a project first."
+    );
+  }
+
+  console.log("Building in directory:", currentProjectDir);
+  try {
+    const { stdout, stderr } = await execAsync("sui move build", {
+      cwd: currentProjectDir,
+    });
+    if (stderr) {
+      throw new Error(stderr);
     }
-    
-    console.log("Building in directory:", currentProjectDir);
-    try {
-        const { stdout, stderr } = await execAsync('sui move build', {
-            cwd: currentProjectDir
-        });
-        if (stderr) {
-            throw new Error(stderr);
-        }
-        return stdout;
-    } catch (error: any) {
-        throw new Error(`Failed to build Move project: ${error.message}`);
-    }
+    return stdout;
+  } catch (error: any) {
+    throw new Error(`Failed to build Move project: ${error.message}`);
+  }
 }
 
 export async function SuiMoveTest(): Promise<string> {
-    if (!currentProjectDir) {
-        throw new Error('No active project directory. Please create or open a project first.');
+  if (!currentProjectDir) {
+    throw new Error(
+      "No active project directory. Please create or open a project first."
+    );
+  }
+
+  console.log("Testing in directory:", currentProjectDir);
+  try {
+    const { stdout, stderr } = await execAsync("sui move test", {
+      cwd: currentProjectDir,
+    });
+    if (stderr) {
+      throw new Error(stderr);
     }
-    
-    console.log("Testing in directory:", currentProjectDir);
-    try {
-        const { stdout, stderr } = await execAsync('sui move test', {
-            cwd: currentProjectDir
-        });
-        if (stderr) {
-            throw new Error(stderr);
-        }
-        return stdout;
-    } catch (error: any) {
-        throw new Error(`Failed to test Move project: ${error.message}`);
-    }
+    return stdout;
+  } catch (error: any) {
+    throw new Error(`Failed to test Move project: ${error.message}`);
+  }
 }
 
 export async function SuiMovePublish(): Promise<string> {
-    if (!currentProjectDir) {
-        throw new Error('No active project directory. Please create or open a project first.');
+  if (!currentProjectDir) {
+    throw new Error(
+      "No active project directory. Please create or open a project first."
+    );
+  }
+
+  // Check version compatibility first
+  const warnings = await checkVersionCompatibility();
+
+  console.log("Publishing from directory:", currentProjectDir);
+  try {
+    const { stdout, stderr } = await execAsync(
+      "sui client publish --gas-budget 100000000",
+      {
+        cwd: currentProjectDir,
+      }
+    );
+
+    // Include warnings in the success message if they exist
+    if (warnings.length > 0) {
+      return `${stdout}\n\nWarnings:\n${warnings.join("\n")}`;
     }
-    
-    // Check version compatibility first
-    const warnings = await checkVersionCompatibility();
-    
-    console.log("Publishing from directory:", currentProjectDir);
-    try {
-        const { stdout, stderr } = await execAsync('sui client publish --gas-budget 100000000', {
-            cwd: currentProjectDir
-        });
-        
-        // Include warnings in the success message if they exist
-        if (warnings.length > 0) {
-            return `${stdout}\n\nWarnings:\n${warnings.join('\n')}`;
-        }
-        
-        return stdout;
-    } catch (error: any) {
-        const errorMsg = error.message || 'Unknown error';
-        if (warnings.length > 0) {
-            throw new Error(`Failed to publish Move project. \n\nWarnings:\n${warnings.join('\n')}\n\nError:\n${errorMsg}`);
-        }
-        throw new Error(`Failed to publish Move project: ${errorMsg}`);
+
+    return stdout;
+  } catch (error: any) {
+    const errorMsg = error.message || "Unknown error";
+    if (warnings.length > 0) {
+      throw new Error(
+        `Failed to publish Move project. \n\nWarnings:\n${warnings.join(
+          "\n"
+        )}\n\nError:\n${errorMsg}`
+      );
     }
+    throw new Error(`Failed to publish Move project: ${errorMsg}`);
+  }
 }
 
 export async function SuiUpdateCli(): Promise<string> {
-    try {
-        const workingDir = await getWorkingDirectory();
-        const { stdout, stderr } = await execAsync(
-            'cargo install --locked --git https://github.com/MystenLabs/sui.git --branch devnet sui',
-            { cwd: workingDir }
-        );
-        
-        if (stderr) {
-            console.log("Update stderr:", stderr);
-        }
-        
-        return "Sui CLI updated successfully. Please restart VS Code.";
-    } catch (error: any) {
-        throw new Error(`Failed to update Sui CLI: ${error.message}`);
+  try {
+    const workingDir = await getWorkingDirectory();
+    const { stdout, stderr } = await execAsync(
+      "cargo install --locked --git https://github.com/MystenLabs/sui.git --branch devnet sui",
+      { cwd: workingDir }
+    );
+
+    if (stderr) {
+      console.log("Update stderr:", stderr);
     }
+
+    return "Sui CLI updated successfully. Please restart VS Code.";
+  } catch (error: any) {
+    throw new Error(`Failed to update Sui CLI: ${error.message}`);
+  }
 }
 
-export async function SuiClientEnvs(): Promise<{list: any[], active: string}> {
-    try {
-        const workingDir = await getWorkingDirectory();
-        const { stdout } = await execAsync('sui client envs', {
-            cwd: workingDir
-        });
-        const lines = stdout.split('\n').filter(line => line.trim());
-        const envs = lines.slice(1).map(line => {
-            const [alias, url, active] = line.split('|').map(s => s.trim());
-            return { alias, url, active: active === '*' };
-        });
-        const activeEnv = envs.find(env => env.active)?.alias || '';
-        return { list: envs, active: activeEnv };
-    } catch (error: any) {
-        throw new Error(`Failed to get environments: ${error.message}`);
-    }
+export async function SuiClientEnvs(): Promise<{
+  list: any[];
+  active: string;
+}> {
+  try {
+    const workingDir = await getWorkingDirectory();
+    const { stdout } = await execAsync("sui client envs", {
+      cwd: workingDir,
+    });
+    const lines = stdout.split("\n").filter((line) => line.trim());
+    const envs = lines.slice(1).map((line) => {
+      const [alias, url, active] = line.split("|").map((s) => s.trim());
+      return { alias, url, active: active === "*" };
+    });
+    const activeEnv = envs.find((env) => env.active)?.alias || "";
+    return { list: envs, active: activeEnv };
+  } catch (error: any) {
+    throw new Error(`Failed to get environments: ${error.message}`);
+  }
 }
 
 export async function SuiClientSwitch(env: string): Promise<string> {
-    try {
-        const workingDir = await getWorkingDirectory();
-        const { stdout } = await execAsync(`sui client switch --env ${env}`, {
-            cwd: workingDir
-        });
-        return stdout;
-    } catch (error: any) {
-        throw new Error(`Failed to switch environment: ${error.message}`);
-    }
+  try {
+    const workingDir = await getWorkingDirectory();
+    const { stdout } = await execAsync(`sui client switch --env ${env}`, {
+      cwd: workingDir,
+    });
+    return stdout;
+  } catch (error: any) {
+    throw new Error(`Failed to switch environment: ${error.message}`);
+  }
 }
 
-export async function SuiClientNewEnv(alias: string, rpc: string): Promise<string> {
-    try {
-        const workingDir = await getWorkingDirectory();
-        const { stdout } = await execAsync(
-            `sui client new-env --alias ${alias} --rpc ${rpc}`,
-            { cwd: workingDir }
-        );
-        return stdout;
-    } catch (error: any) {
-        throw new Error(`Failed to add new environment: ${error.message}`);
-    }
+export async function SuiClientNewEnv(
+  alias: string,
+  rpc: string
+): Promise<string> {
+  try {
+    const workingDir = await getWorkingDirectory();
+    const { stdout } = await execAsync(
+      `sui client new-env --alias ${alias} --rpc ${rpc}`,
+      { cwd: workingDir }
+    );
+    return stdout;
+  } catch (error: any) {
+    throw new Error(`Failed to add new environment: ${error.message}`);
+  }
 }
