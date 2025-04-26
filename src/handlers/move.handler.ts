@@ -2,8 +2,7 @@ import * as vscode from "vscode";
 import {
   SuiMoveNew,
   SuiMoveBuild,
-  SuiMoveTest,
-  SuiMovePublish,
+  SuiMoveTest
 } from "../services/sui.service";
 import { MoveInitRequest } from "../types/move/init.type";
 import { getWorkSpacePath } from "../utils/path";
@@ -81,22 +80,3 @@ export async function HandleMoveTest(webview: vscode.Webview) {
   }
 }
 
-export async function HandleMovePublish(webview: vscode.Webview) {
-  console.log("Handling MovePublish");
-  try {
-    const result = await SuiMovePublish(webview);
-    console.log("MovePublish success:", result);
-    webview.postMessage({
-      type: "moveStatus",
-      status: "success",
-      message: `Publish completed successfully. ${result}`,
-    });
-  } catch (error: any) {
-    console.error("MovePublish error:", error.message);
-    webview.postMessage({
-      type: "moveStatus",
-      status: "error",
-      message: error.message,
-    });
-  }
-}

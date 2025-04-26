@@ -74,6 +74,16 @@ export default function SuiHelp() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
+              onClick={() => navigate("/publish")}
+              variant="outline"
+              className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              CLient
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+            <Button
               onClick={() => navigate("/move")}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"

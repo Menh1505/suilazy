@@ -4,8 +4,10 @@ import {
   HandleMoveNew,
   HandleMoveBuild,
   HandleMoveTest,
-  HandleMovePublish,
 } from "./move.handler";
+import {
+  HandleClientPublish
+} from "./client.handler";
 import {
   HandleFetchEnvironments,
   HandleSwitchEnvironment,
@@ -43,7 +45,7 @@ export function ReceiveMessageHandler(
       HandleMoveTest(webview);
       break;
     case SuiCommand.MOVE_PUBLISH:
-      HandleMovePublish(webview);
+      HandleClientPublish(webview);
       break;
     case SuiCommand.UPDATE_CLI:
       HandleCliUpdate(webview);

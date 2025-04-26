@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { SuiCommand } from "../../utils/utils";
 import { BackButton } from "../../components/ui/back-button";
-import { ResultDisplay } from "../../components/ui/result-display";
+
 
 export default function MoveTest() {
   const [result, setResult] = useState<string | null>(null);
@@ -44,7 +44,6 @@ export default function MoveTest() {
         >
           Test Project
         </Button>
-        <ResultDisplay result={result} error={error} />
       </CardContent>
     </Card>
   );

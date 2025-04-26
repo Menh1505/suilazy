@@ -264,35 +264,61 @@ export async function SuiMoveTest(webview: vscode.Webview): Promise<string> {
   }
 }
 
-export async function SuiMovePublish(webview: vscode.Webview): Promise<string> {
-  const workspacePath = getCurrentWorkspaceFolder(webview);
+export async function SuiCLientPublish(webview: vscode.Webview): Promise<string> {
+  const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
+  console.log("Handling MovePublish:", workspacePath);
+
   if (!workspacePath) {
-    return "Please open a file in your target folder first";
+    throw new Error(message || "No workspace path found.");
   }
 
-  const warnings = await checkVersionCompatibility();
+  const command = "sui";
+  const cmdArgs: string[] = ["client", "publish"];
+  cmdArgs.push("--gas-budget", "100000000"); // Default gas budget
 
   try {
-    const { stdout, stderr } = await execAsync(
-      "sui client publish --gas-budget 100000000"
-      // { cwd: workspacePath }
-    );
+    // Check version compatibility first
+    const warnings = await checkVersionCompatibility();
+    console.log("Version compatibility check warnings:", warnings);
 
-    if (warnings.length > 0) {
-      return `${stdout}\n\nWarnings:\n${warnings.join("\n")}`;
-    }
-    return stdout;
+    // Execute publish command
+    const output = await processCLI(command, cmdArgs, workspacePath);
+    console.log("✅ CLI output:", output);
+
+    // Parse and format the output
+    const formattedOutput = parsePublishOutput(output, warnings);
+    
+    // Send success status to webview
+    webview.postMessage({
+      type: "moveStatus",
+      status: "success",
+      message: formattedOutput
+    });
+
+    return formattedOutput;
   } catch (error: any) {
-    const errorMsg = error.message || "Unknown error";
-    if (warnings.length > 0) {
-      throw new Error(
-        `Failed to publish Move project. \n\nWarnings:\n${warnings.join(
-          "\n"
-        )}\n\nError:\n${errorMsg}`
-      );
-    }
-    throw new Error(`Failed to publish Move project: ${errorMsg}`);
+    console.error("❌ CLI error:", error);
+    
+    // Send error status to webview
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: `Failed to publish Move project: ${error.message}`
+    });
+
+    throw new Error(`Sui move publish failed: ${error.message}`);
   }
+}
+
+function parsePublishOutput(output: string, warnings: string[]): string {
+  let result = output;
+  
+  // Add any version mismatch warnings at the beginning
+  if (warnings.length > 0) {
+    result = warnings.join("\n") + "\n\n" + result;
+  }
+
+  return result;
 }
 
 export async function SuiUpdateCli(): Promise<string> {

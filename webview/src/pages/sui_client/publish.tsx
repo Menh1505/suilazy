@@ -5,7 +5,6 @@ import { Input } from "../../components/ui/input";
 import { Switch } from "../../components/ui/switch";
 import { SuiCommand } from "../../utils/utils";
 import { BackButton } from "../../components/ui/back-button";
-import { ResultDisplay } from "../../components/ui/result-display";
 import {
   Tooltip,
   TooltipContent,
@@ -13,6 +12,7 @@ import {
   TooltipProvider,
 } from "../../components/ui/tooltip";
 import { Loader2 } from "lucide-react";
+import { StatusDialog } from "../../components/status-dialog";
 
 // Add this type definition near the top of the file
 type MoveOptions = {
@@ -32,11 +32,13 @@ type MoveOptions = {
   jsonErrors: boolean;
 };
 
-export default function MoveDeploy() {
+export default function ClientPublish() {
   const [isLoading, setIsLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  
+  
   // Basic options
   const [packagePath, setPackagePath] = useState(".");
   const [gasBudget, setGasBudget] = useState("");
@@ -65,6 +67,7 @@ export default function MoveDeploy() {
       const message = event.data;
       if (message.type === "moveStatus") {
         setIsLoading(false);
+        setDialogOpen(true);
         if (message.status === "success") {
           setResult(message.message);
           setError(null);
@@ -79,7 +82,7 @@ export default function MoveDeploy() {
     return () => window.removeEventListener("message", messageHandler);
   }, []);
 
-  const handleDeploy = () => {
+  const handlePublish = () => {
     setIsLoading(true);
     setResult(null);
     setError(null);
@@ -108,22 +111,22 @@ export default function MoveDeploy() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Deploy Project
+                  Publish Project
                 </h1>
-                <p className="text-gray-400 mt-1">Configure and deploy your Move package</p>
+                <p className="text-gray-400 mt-1">Configure and Publish your Move package</p>
               </div>
               <Button
-                onClick={handleDeploy}
+                onClick={handlePublish}
                 disabled={isLoading}
                 className="bg-blue-600 hover:bg-blue-500 text-white px-6"
               >
                 {isLoading ? (
                   <div className="flex items-center">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deploying
+                    Publish
                   </div>
                 ) : (
-                  "Deploy"
+                  "Publish"
                 )}
               </Button>
             </div>
@@ -248,9 +251,15 @@ export default function MoveDeploy() {
           </div>
 
           {/* Result Section */}
-          <div className="mt-6">
-            <ResultDisplay result={result} error={error} />
-          </div>
+          <StatusDialog 
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            loading={isLoading}
+            status={{
+              type: error ? "error" : "success",
+              message: error || result || ""
+            }}
+          />
         </CardContent>
       </Card>
     </TooltipProvider>

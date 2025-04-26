@@ -531,8 +531,8 @@ export default function MoveBuild() {
         successTitle="Building Successful"
         errorTitle="Build Failed"
         successAction={{
-          label: "Go to build",
-          onClick: () => navigate("move/publish"),
+          label: "Go to Publish",
+          onClick: () => navigate("/publish"),
         }}
       />
     </div>
