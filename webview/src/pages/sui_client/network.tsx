@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { SuiCommand } from "../utils/utils";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { SuiCommand } from "../../utils/utils";
 import { RefreshCw } from "lucide-react"; // Add this import
 
 const DEFAULT_NETWORKS = {
@@ -12,7 +12,7 @@ const DEFAULT_NETWORKS = {
   mainnet: "https://fullnode.mainnet.sui.io:443",
 };
 
-export default function Network() {
+export default function ClientNetwork() {
   const [environments, setEnvironments] = useState<{ alias: string; url: string; active: boolean }[]>([]);
   const [activeEnv, setActiveEnv] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -132,8 +132,8 @@ export default function Network() {
                     key={env.alias}
                     onClick={() => switchEnvironment(env.alias)}
                     className={`p-4 rounded-lg border cursor-pointer transition-colors ${env.alias === activeEnv
-                        ? "border-blue-500 bg-blue-500/10"
-                        : "border-gray-700 hover:border-gray-600"
+                      ? "border-blue-500 bg-blue-500/10"
+                      : "border-gray-700 hover:border-gray-600"
                       }`}
                   >
                     <div className="flex justify-between items-center">
