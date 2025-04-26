@@ -52,23 +52,23 @@ export default function SuiHelp() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
-              onClick={() => navigate("/sui/network")}
+              onClick={() => navigate("/network")}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
               Network
             </Button>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
-              onClick={() => navigate("/sui/move")}
+              onClick={() => navigate("/client")}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
-              Genesis
+              Client
             </Button>
           </div>
 

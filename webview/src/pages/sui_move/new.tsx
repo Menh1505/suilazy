@@ -1,33 +1,44 @@
-"use client"
+// ... existing imports ...
+import { Switch } from "../../components/ui/switch";
 
-import type React from "react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "../../components/ui/tooltip";
+import { BackButton } from "../../components/ui/back-button";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { MoveInitRequest } from "../../types/move/init.type";
+import { SuiCommand } from "../../utils/utils";
+import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Loader2 } from "lucide-react";
+import { Input } from "../../components/ui/input";
+import { StatusDialog } from "../../components/status-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import { Input } from "../../components/ui/input"
-import { Label } from "../../components/ui/label"
-import { Button } from "../../components/ui/button"
-import { Checkbox } from "../../components/ui/checkbox"
-import { ArrowLeft, Loader2 } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import { SuiCommand } from "../../utils/utils"
-import type { MoveInitRequest } from "../../types/move/init.type"
-
-// Assuming you have a StatusDialog component similar to the one in the Aptos code
-// If not, you'll need to create it
-import { StatusDialog } from "../../components/status-dialog"
-import { useNavigate } from "react-router-dom"
+// Sample templates - replace with actual Sui Move templates
+const templates = ["counter", "hello_world", "fungible_tokens", "nft", "defi"];
 
 export default function MoveNew() {
   const navigate = useNavigate();
-  const [initializing, setInitializing] = useState(false)
-  const [showDialog, setShowDialog] = useState(false)
-  const [cliStatus, setCliStatus] = useState<{ type: "success" | "error"; message: string }>({
+  const [initializing, setInitializing] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [cliStatus, setCliStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  }>({
     type: "success",
     message: "",
-  })
-  const [activeTab, setActiveTab] = useState<"simple" | "advanced">("simple")
+  });
 
   // Basic states
   const [initArgs, setInitArgs] = useState({
@@ -50,25 +61,24 @@ export default function MoveNew() {
     jsonErrors: false,
     noLint: false,
     lint: false,
-  })
-
-  // Sample templates - replace with actual Sui Move templates
-  const templates = ["counter", "hello_world", "fungible_tokens", "nft", "defi"]
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target
+    const { name, value, type } = e.target;
     setInitArgs((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-    }))
-  }
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    }));
+  };
 
   const handleTemplateChange = (value: string) => {
     setInitArgs((prev) => ({
       ...prev,
       template: value,
-    }))
-  }
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!initArgs.name.trim()) {
@@ -120,343 +130,220 @@ export default function MoveNew() {
     }
   };
 
+  const resetOptions = () => {
+    setInitArgs({
+      name: "",
+      packagePath: "",
+      template: "",
+      installDir: "",
+      defaultMoveFlavor: "",
+      defaultMoveEdition: "",
+      dev: false,
+      test: false,
+      doc: false,
+      disassemble: false,
+      force: false,
+      fetchDepsOnly: false,
+      skipFetchLatestGitDeps: false,
+      dependenciesAreRoot: false,
+      silenceWarnings: false,
+      warningsAreErrors: false,
+      jsonErrors: false,
+      noLint: false,
+      lint: false,
+    });
+  };
+
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
-      const message = event.data
+      const message = event.data;
       if (message.type === "moveStatus") {
         setCliStatus({
           type: message.status === "success" ? "success" : "error",
           message: message.message || "",
-        })
-        setInitializing(false)
-        setShowDialog(true)
+        });
+        setInitializing(false);
+        setShowDialog(true);
       }
-    }
+    };
 
-    window.addEventListener("message", messageHandler)
-    return () => window.removeEventListener("message", messageHandler)
-  }, [])
+    window.addEventListener("message", messageHandler);
+    return () => window.removeEventListener("message", messageHandler);
+  }, []);
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <Card className="min-h-screen border-gray-800 bg-gray-900/50">
-        <Button
-          variant="outline"
-          className="h-12 flex items-center justify-center gap-2 hover:bg-gray-700 mt-2 ml-2"
-          onClick={() => navigate("/move/help")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back</span>
-        </Button>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-white">Init Project</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as "simple" | "advanced")}>
-            <TabsList className="grid w-full grid-cols-2 bg-gray-800">
-              <TabsTrigger value="simple" className="data-[state=active]:bg-gray-700">
-                Simple
-              </TabsTrigger>
-              <TabsTrigger value="advanced" className="data-[state=active]:bg-gray-700">
-                Advanced
-              </TabsTrigger>
-            </TabsList>
+    <TooltipProvider>
+      <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
+        <CardContent className="p-6">
+          <BackButton />
 
-            <div className="space-y-2 mt-6">
-              <Label htmlFor="name" className="text-white">
-                Name (required)
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                value={initArgs.name}
-                onChange={handleInputChange}
-                className="bg-gray-800 border-gray-700 text-white"
-                required
-              />
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-              <TabsContent value="simple">
-                <div className="space-y-2">
-                  <Label htmlFor="template" className="text-white">
-                    Template (Optional)
-                  </Label>
-                  <Select onValueChange={handleTemplateChange} value={initArgs.template}>
-                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                      <SelectValue placeholder="[Please select a template]" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                      {templates.map((template) => (
-                        <SelectItem key={template} value={template}>
-                          {template}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="advanced">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="template" className="text-white">
-                      Template
-                    </Label>
-                    <Select onValueChange={handleTemplateChange} value={initArgs.template}>
-                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                        <SelectValue placeholder="[Please select a template]" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                        {templates.map((template) => (
-                          <SelectItem key={template} value={template}>
-                            {template}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="packagePath" className="text-white">
-                      Package Path (-p, --path)
-                    </Label>
-                    <Input
-                      id="packagePath"
-                      name="packagePath"
-                      value={initArgs.packagePath}
-                      onChange={handleInputChange}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="installDir" className="text-white">
-                      Install Directory (--install-dir)
-                    </Label>
-                    <Input
-                      id="installDir"
-                      name="installDir"
-                      value={initArgs.installDir}
-                      onChange={handleInputChange}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="defaultMoveFlavor" className="text-white">
-                      Default Move Flavor (--default-move-flavor)
-                    </Label>
-                    <Input
-                      id="defaultMoveFlavor"
-                      name="defaultMoveFlavor"
-                      value={initArgs.defaultMoveFlavor}
-                      onChange={handleInputChange}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="defaultMoveEdition" className="text-white">
-                      Default Move Edition (--default-move-edition)
-                    </Label>
-                    <Input
-                      id="defaultMoveEdition"
-                      name="defaultMoveEdition"
-                      value={initArgs.defaultMoveEdition}
-                      onChange={handleInputChange}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="dev"
-                      name="dev"
-                      checked={initArgs.dev}
-                      onCheckedChange={(checked) => setInitArgs((prev) => ({ ...prev, dev: checked as boolean }))}
-                    />
-                    <Label htmlFor="dev" className="text-white">
-                      Dev Mode (-d, --dev)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="test"
-                      name="test"
-                      checked={initArgs.test}
-                      onCheckedChange={(checked) => setInitArgs((prev) => ({ ...prev, test: checked as boolean }))}
-                    />
-                    <Label htmlFor="test" className="text-white">
-                      Test Mode (--test)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="doc"
-                      name="doc"
-                      checked={initArgs.doc}
-                      onCheckedChange={(checked) => setInitArgs((prev) => ({ ...prev, doc: checked as boolean }))}
-                    />
-                    <Label htmlFor="doc" className="text-white">
-                      Generate Docs (--doc)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="disassemble"
-                      name="disassemble"
-                      checked={initArgs.disassemble}
-                      onCheckedChange={(checked) =>
-                        setInitArgs((prev) => ({ ...prev, disassemble: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="disassemble" className="text-white">
-                      Disassemble (--disassemble)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="force"
-                      name="force"
-                      checked={initArgs.force}
-                      onCheckedChange={(checked) => setInitArgs((prev) => ({ ...prev, force: checked as boolean }))}
-                    />
-                    <Label htmlFor="force" className="text-white">
-                      Force (--force)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="fetchDepsOnly"
-                      name="fetchDepsOnly"
-                      checked={initArgs.fetchDepsOnly}
-                      onCheckedChange={(checked) =>
-                        setInitArgs((prev) => ({ ...prev, fetchDepsOnly: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="fetchDepsOnly" className="text-white">
-                      Fetch Dependencies Only (--fetch-deps-only)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="skipFetchLatestGitDeps"
-                      name="skipFetchLatestGitDeps"
-                      checked={initArgs.skipFetchLatestGitDeps}
-                      onCheckedChange={(checked) =>
-                        setInitArgs((prev) => ({ ...prev, skipFetchLatestGitDeps: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="skipFetchLatestGitDeps" className="text-white">
-                      Skip Fetch Latest Git Dependencies
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="dependenciesAreRoot"
-                      name="dependenciesAreRoot"
-                      checked={initArgs.dependenciesAreRoot}
-                      onCheckedChange={(checked) =>
-                        setInitArgs((prev) => ({ ...prev, dependenciesAreRoot: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="dependenciesAreRoot" className="text-white">
-                      Dependencies Are Root
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="silenceWarnings"
-                      name="silenceWarnings"
-                      checked={initArgs.silenceWarnings}
-                      onCheckedChange={(checked) =>
-                        setInitArgs((prev) => ({ ...prev, silenceWarnings: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="silenceWarnings" className="text-white">
-                      Silence Warnings
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="warningsAreErrors"
-                      name="warningsAreErrors"
-                      checked={initArgs.warningsAreErrors}
-                      onCheckedChange={(checked) =>
-                        setInitArgs((prev) => ({ ...prev, warningsAreErrors: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="warningsAreErrors" className="text-white">
-                      Warnings Are Errors
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="jsonErrors"
-                      name="jsonErrors"
-                      checked={initArgs.jsonErrors}
-                      onCheckedChange={(checked) =>
-                        setInitArgs((prev) => ({ ...prev, jsonErrors: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="jsonErrors" className="text-white">
-                      JSON Errors
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="noLint"
-                      name="noLint"
-                      checked={initArgs.noLint}
-                      onCheckedChange={(checked) => setInitArgs((prev) => ({ ...prev, noLint: checked as boolean }))}
-                    />
-                    <Label htmlFor="noLint" className="text-white">
-                      No Lint (--no-lint)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="lint"
-                      name="lint"
-                      checked={initArgs.lint}
-                      onCheckedChange={(checked) => setInitArgs((prev) => ({ ...prev, lint: checked as boolean }))}
-                    />
-                    <Label htmlFor="lint" className="text-white">
-                      Lint (--lint)
-                    </Label>
-                  </div>
-                </div>
-              </TabsContent>
-
+          {/* Project Configuration Section */}
+          <div className="mt-6 space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Init Project
+                </h1>
+                <p className="text-gray-400 mt-1">
+                  Configure and initialize your Move package
+                </p>
+              </div>
               <Button
-                type="submit"
+                onClick={handleSubmit}
                 disabled={initializing}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-14"
+                className="bg-blue-600 hover:bg-blue-500 text-white px-6"
               >
                 {initializing ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Initializing Project...</span>
+                  <div className="flex items-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Initializing
                   </div>
                 ) : (
-                  "Initialize Project"
+                  "Initialize"
                 )}
               </Button>
-            </form>
-          </Tabs>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Basic Settings */}
+              <div className="space-y-6">
+                <div className="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
+                  <h2 className="text-lg font-medium mb-4">
+                    Basic Configuration
+                  </h2>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-400">
+                        Project Name
+                      </label>
+                      <Input
+                        name="name"
+                        value={initArgs.name}
+                        onChange={handleInputChange}
+                        placeholder="Enter project name"
+                        className="bg-gray-900/50"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-400">Template</label>
+                      <Select
+                        onValueChange={handleTemplateChange}
+                        value={initArgs.template}
+                      >
+                        <SelectTrigger className="bg-gray-900/50">
+                          <SelectValue placeholder="Select a template" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900/50">
+                          {templates.map((template) => (
+                            <SelectItem key={template} value={template}>
+                              {template}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Advanced Options */}
+              <div className="space-y-6">
+                <div className="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-medium">Advanced Options</h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={resetOptions}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      Reset All
+                    </Button>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {Object.entries({
+                      dev: initArgs.dev,
+                      test: initArgs.test,
+                      doc: initArgs.doc,
+                      disassemble: initArgs.disassemble,
+                      force: initArgs.force,
+                      fetchDepsOnly: initArgs.fetchDepsOnly,
+                      skipFetchLatestGitDeps: initArgs.skipFetchLatestGitDeps,
+                      dependenciesAreRoot: initArgs.dependenciesAreRoot,
+                      silenceWarnings: initArgs.silenceWarnings,
+                      warningsAreErrors: initArgs.warningsAreErrors,
+                      jsonErrors: initArgs.jsonErrors,
+                      noLint: initArgs.noLint,
+                      lint: initArgs.lint,
+                    }).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className={`flex items-center justify-between p-2 rounded transition-colors ${
+                          value
+                            ? "bg-blue-600/10 border border-blue-500/20"
+                            : "hover:bg-gray-700/30"
+                        }`}
+                      >
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center space-x-2">
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                value ? "bg-blue-400" : "bg-gray-500"
+                              }`}
+                            />
+                            <span className="text-sm">
+                              {key
+                                .replace(/([A-Z])/g, " $1")
+                                .split(" ")
+                                .map(
+                                  (word) =>
+                                    word.charAt(0).toUpperCase() +
+                                    word.slice(1).toLowerCase()
+                                )
+                                .join(" ")}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-[250px]">
+                            <p className="text-sm">
+                              {getOptionDescription(key)}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Switch
+                          checked={value}
+                          onCheckedChange={(checked) =>
+                            setInitArgs((prev) => ({ ...prev, [key]: checked }))
+                          }
+                          className={value ? "bg-blue-600" : "bg-gray-600"}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Result Section */}
+          <div className="mt-6">
+            {cliStatus.message && (
+              <div
+                className={`p-4 rounded-lg ${
+                  cliStatus.type === "success"
+                    ? "bg-green-900/20 border border-green-800"
+                    : "bg-red-900/20 border border-red-800"
+                }`}
+              >
+                <p className="text-sm">
+                  {cliStatus.type === "success" ? "✅ " : "❌ "}
+                  {cliStatus.message}
+                </p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -474,6 +361,40 @@ export default function MoveNew() {
           onClick: () => navigate("/move/build"),
         }}
       />
-    </div>
-  )
+    </TooltipProvider>
+  );
 }
+
+// Helper function to get option descriptions
+const getOptionDescription = (key: string): string => {
+  switch (key) {
+    case "dev":
+      return "Enable dev mode for development purposes.";
+    case "test":
+      return "Enable test mode to run tests.";
+    case "doc":
+      return "Generate documentation for the project.";
+    case "disassemble":
+      return "Save disassembly of the compiled code.";
+    case "force":
+      return "Force recompilation even if no changes are detected.";
+    case "fetchDepsOnly":
+      return "Fetch dependencies only without building.";
+    case "skipFetchLatestGitDeps":
+      return "Skip fetching the latest git dependencies.";
+    case "dependenciesAreRoot":
+      return "Treat dependencies as root packages.";
+    case "silenceWarnings":
+      return "Ignore all warnings during the build process.";
+    case "warningsAreErrors":
+      return "Treat warnings as errors.";
+    case "jsonErrors":
+      return "Emit errors in JSON format.";
+    case "noLint":
+      return "Disable linters during the build process.";
+    case "lint":
+      return "Enable extra linters during the build process.";
+    default:
+      return "No description available.";
+  }
+};

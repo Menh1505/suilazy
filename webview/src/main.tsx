@@ -6,7 +6,6 @@ import App from './App.tsx'
 import SuiHelp from './pages/sui_help/index.tsx';
 import MoveTest from './pages/sui_move/test.tsx';
 // import MoveDeploy from './pages/sui_client/deploy.tsx';
-import Network from './pages/network.tsx';
 import { RootLayout } from './RootLayout.tsx';
 import CliNotFound from './pages/installation/cliNotFound.tsx';
 import MoveNew from './pages/sui_move/new.tsx';
@@ -14,6 +13,9 @@ import SuiMove from './pages/sui_move/index.tsx';
 import MoveHelp from './pages/sui_move/help.tsx';
 import MoveDeploy from './pages/sui_client/deploy.tsx';
 import MoveBuild from './pages/sui_move/build.tsx';
+import SuiClient from './pages/sui_client/index.tsx';
+import ClientNetwork from './pages/sui_client/network.tsx';
+import ClientHelp from './pages/sui_client/help.tsx';
 
 
 
@@ -60,9 +62,24 @@ const router = createMemoryRouter([
           }
         ]
       },
+
       {
-        path: "network",
-        element: <Network />
+        path: "client",
+        element: <SuiClient />,
+        children: [
+          {
+            path: "help",
+            element: <ClientHelp />
+          },
+          {
+            path: "deploy",
+            element: <MoveDeploy />
+          },
+          {
+            path: "network",
+            element: <ClientNetwork />
+          },
+        ]
       }
 
       // Nếu bạn muốn bật lại Genesis / Network theo kiểu nested
