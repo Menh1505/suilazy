@@ -8,6 +8,7 @@ import { BackButton } from "../../components/ui/back-button";
 export default function MoveTest() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  console.log("MoveTest component mounted", result, error);
 
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
@@ -37,7 +38,7 @@ export default function MoveTest() {
     <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
       <CardContent className="p-4">
         <BackButton />
-        <Button 
+        <Button
           onClick={handleTest}
           variant="outline"
           className="h-16 w-full border-gray-700 bg-gray-800/50 hover:bg-gray-800"
