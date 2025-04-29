@@ -1,42 +1,29 @@
-// ... existing imports ...
-import { Switch } from "../../components/ui/switch";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "../../components/ui/tooltip";
-import { BackButton } from "../../components/ui/back-button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { MoveInitRequest } from "../../types/move/init.type";
 import { SuiCommand } from "../../utils/utils";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Loader2 } from "lucide-react";
 import { Input } from "../../components/ui/input";
+import { Switch } from "../../components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../../components/ui/tooltip";
+import { BackButton } from "../../components/ui/back-button";
+import { Loader2 } from "lucide-react";
 import { StatusDialog } from "../../components/status-dialog";
 
 export default function MoveBuild() {
   const navigate = useNavigate();
   const [building, setBuilding] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [cliStatus, setCliStatus] = useState<{
-    type: "success" | "error";
-    message: string;
-  }>({
+  const [cliStatus, setCliStatus] = useState<{ type: "success" | "error"; message: string }>({
     type: "success",
     message: "",
   });
 
-  // Basic states
   const [initArgs, setInitArgs] = useState({
     packagePath: "",
-    template: "",
     installDir: "",
     defaultMoveFlavor: "",
-    defaultMoveEdition: "",
     dev: false,
     test: false,
     doc: false,
@@ -56,8 +43,7 @@ export default function MoveBuild() {
     const { name, value, type } = e.target;
     setInitArgs((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -77,7 +63,6 @@ export default function MoveBuild() {
         fetchDepsOnly: initArgs.fetchDepsOnly,
         skipFetchLatestGitDeps: initArgs.skipFetchLatestGitDeps,
         defaultMoveFlavor: initArgs.defaultMoveFlavor.trim() || undefined,
-        defaultMoveEdition: initArgs.defaultMoveEdition.trim() || undefined,
         dependenciesAreRoot: initArgs.dependenciesAreRoot,
         silenceWarnings: initArgs.silenceWarnings,
         warningsAreErrors: initArgs.warningsAreErrors,
@@ -92,8 +77,6 @@ export default function MoveBuild() {
         command: SuiCommand.MOVE_BUILD,
         data,
       });
-
-      console.log("Sending data to backend:", data);
     } catch (error) {
       console.error("Error sending data:", error);
       setBuilding(false);
@@ -105,10 +88,8 @@ export default function MoveBuild() {
   const resetOptions = () => {
     setInitArgs({
       packagePath: "",
-      template: "",
       installDir: "",
       defaultMoveFlavor: "",
-      defaultMoveEdition: "",
       dev: false,
       test: false,
       doc: false,
@@ -144,25 +125,24 @@ export default function MoveBuild() {
 
   return (
     <TooltipProvider>
-      <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
+      <Card className="w-full min-h-screen border-[var(--vscode-editorWidget-border)] bg-[var(--vscode-editor-background)]/50">
         <CardContent className="p-6">
           <BackButton />
 
-          {/* Project Configuration Section */}
           <div className="mt-6 space-y-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-[var(--vscode-editor-foreground)]">
                   Build Project
                 </h1>
-                <p className="text-gray-400 mt-1">
+                <p className="text-[var(--vscode-editor-foreground)]/70 mt-1">
                   Configure and build your Move package
                 </p>
               </div>
               <Button
                 onClick={handleSubmit}
                 disabled={building}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6"
+                className="bg-[var(--vscode-button-background)] hover:bg-[var(--vscode-button-hoverBackground)] text-[var(--vscode-button-foreground)] px-6"
               >
                 {building ? (
                   <div className="flex items-center">
@@ -175,17 +155,15 @@ export default function MoveBuild() {
               </Button>
             </div>
 
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Basic Settings */}
               <div className="space-y-6">
-                <div className="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
-                  <h2 className="text-lg font-medium mb-4">
+                <div className="bg-[var(--vscode-editor-background)]/50 rounded-lg p-4 border border-[var(--vscode-editorWidget-border)]">
+                  <h2 className="text-lg font-medium text-[var(--vscode-editor-foreground)] mb-4">
                     Basic Configuration
                   </h2>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm text-gray-400">
+                      <label className="text-sm text-[var(--vscode-editor-foreground)]/70">
                         Package Path
                       </label>
                       <Input
@@ -193,12 +171,12 @@ export default function MoveBuild() {
                         value={initArgs.packagePath}
                         onChange={handleInputChange}
                         placeholder="."
-                        className="bg-gray-900/50"
+                        className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-400">
+                        <label className="text-sm text-[var(--vscode-editor-foreground)]/70">
                           Install Directory
                         </label>
                         <Input
@@ -206,11 +184,11 @@ export default function MoveBuild() {
                           value={initArgs.installDir}
                           onChange={handleInputChange}
                           placeholder="Optional"
-                          className="bg-gray-900/50"
+                          className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-400">
+                        <label className="text-sm text-[var(--vscode-editor-foreground)]/70">
                           Default Move Flavor
                         </label>
                         <Input
@@ -218,7 +196,7 @@ export default function MoveBuild() {
                           value={initArgs.defaultMoveFlavor}
                           onChange={handleInputChange}
                           placeholder="Optional"
-                          className="bg-gray-900/50"
+                          className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                         />
                       </div>
                     </div>
@@ -226,53 +204,40 @@ export default function MoveBuild() {
                 </div>
               </div>
 
-              {/* Right Column - Advanced Options */}
               <div className="space-y-6">
-                <div className="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
+                <div className="bg-[var(--vscode-editor-background)]/50 rounded-lg p-4 border border-[var(--vscode-editorWidget-border)]">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-medium">Advanced Options</h2>
+                    <h2 className="text-lg font-medium text-[var(--vscode-editor-foreground)]">
+                      Advanced Options
+                    </h2>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={resetOptions}
-                      className="text-gray-400 hover:text-white"
+                      className="text-[var(--vscode-editor-foreground)]/70 hover:text-[var(--vscode-editor-foreground)]"
                     >
                       Reset All
                     </Button>
                   </div>
 
                   <div className="grid gap-3">
-                    {Object.entries({
-                      dev: initArgs.dev,
-                      test: initArgs.test,
-                      doc: initArgs.doc,
-                      disassemble: initArgs.disassemble,
-                      force: initArgs.force,
-                      fetchDepsOnly: initArgs.fetchDepsOnly,
-                      skipFetchLatestGitDeps: initArgs.skipFetchLatestGitDeps,
-                      dependenciesAreRoot: initArgs.dependenciesAreRoot,
-                      silenceWarnings: initArgs.silenceWarnings,
-                      warningsAreErrors: initArgs.warningsAreErrors,
-                      jsonErrors: initArgs.jsonErrors,
-                      noLint: initArgs.noLint,
-                      lint: initArgs.lint,
-                    }).map(([key, value]) => (
+                    {Object.entries(initArgs).map(([key, value]) => (
                       <div
                         key={key}
-                        className={`flex items-center justify-between p-2 rounded transition-colors ${
-                          value
-                            ? "bg-blue-600/10 border border-blue-500/20"
-                            : "hover:bg-gray-700/30"
-                        }`}
+                        className={`flex items-center justify-between p-2 rounded transition-colors ${value
+                            ? "bg-[var(--vscode-button-background)]/10 border border-[var(--vscode-button-background)]/20"
+                            : "hover:bg-[var(--vscode-editor-background)]/30"
+                          }`}
                       >
                         <Tooltip>
                           <TooltipTrigger className="flex items-center space-x-2">
                             <div
-                              className={`w-2 h-2 rounded-full ${
-                                value ? "bg-blue-400" : "bg-gray-500"
-                              }`}
+                              className={`w-2 h-2 rounded-full ${value
+                                  ? "bg-[var(--vscode-button-foreground)]"
+                                  : "bg-[var(--vscode-editor-foreground)]/50"
+                                }`}
                             />
-                            <span className="text-sm">
+                            <span className="text-sm text-[var(--vscode-editor-foreground)]">
                               {key
                                 .replace(/([A-Z])/g, " $1")
                                 .split(" ")
@@ -285,17 +250,20 @@ export default function MoveBuild() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="left" className="max-w-[250px]">
-                            <p className="text-sm">
+                            <p className="text-sm text-[var(--vscode-editor-foreground)]">
                               {getOptionDescription(key)}
                             </p>
                           </TooltipContent>
                         </Tooltip>
                         <Switch
-                          checked={value}
+                          checked={Boolean(value)}
                           onCheckedChange={(checked) =>
                             setInitArgs((prev) => ({ ...prev, [key]: checked }))
                           }
-                          className={value ? "bg-blue-600" : "bg-gray-600"}
+                          className={`${value
+                              ? "bg-[var(--vscode-button-background)]"
+                              : "bg-[var(--vscode-editorWidget-border)]"
+                            }`}
                         />
                       </div>
                     ))}
@@ -305,17 +273,15 @@ export default function MoveBuild() {
             </div>
           </div>
 
-          {/* Result Section */}
           <div className="mt-6">
             {cliStatus.message && (
               <div
-                className={`p-4 rounded-lg ${
-                  cliStatus.type === "success"
-                    ? "bg-green-900/20 border border-green-800"
-                    : "bg-red-900/20 border border-red-800"
-                }`}
+                className={`p-4 rounded-lg ${cliStatus.type === "success"
+                    ? "bg-[var(--vscode-button-background)]/10 border border-[var(--vscode-button-background)]"
+                    : "bg-[var(--vscode-errorForeground)]/10 border border-[var(--vscode-errorForeground)]"
+                  }`}
               >
-                <p className="text-sm">
+                <p className="text-sm text-[var(--vscode-editor-foreground)]">
                   {cliStatus.type === "success" ? "✅ " : "❌ "}
                   {cliStatus.message}
                 </p>
@@ -343,36 +309,21 @@ export default function MoveBuild() {
   );
 }
 
-// Helper function to get option descriptions
 const getOptionDescription = (key: string): string => {
-  switch (key) {
-    case "dev":
-      return "Enable dev mode for development purposes.";
-    case "test":
-      return "Enable test mode to run tests.";
-    case "doc":
-      return "Generate documentation for the project.";
-    case "disassemble":
-      return "Save disassembly of the compiled code.";
-    case "force":
-      return "Force recompilation even if no changes are detected.";
-    case "fetchDepsOnly":
-      return "Fetch dependencies only without building.";
-    case "skipFetchLatestGitDeps":
-      return "Skip fetching the latest git dependencies.";
-    case "dependenciesAreRoot":
-      return "Treat dependencies as root packages.";
-    case "silenceWarnings":
-      return "Ignore all warnings during the build process.";
-    case "warningsAreErrors":
-      return "Treat warnings as errors.";
-    case "jsonErrors":
-      return "Emit errors in JSON format.";
-    case "noLint":
-      return "Disable linters during the build process.";
-    case "lint":
-      return "Enable extra linters during the build process.";
-    default:
-      return "No description available.";
-  }
+  const descriptions: Record<string, string> = {
+    dev: "Enable dev mode for development purposes.",
+    test: "Enable test mode to run tests.",
+    doc: "Generate documentation for the project.",
+    disassemble: "Save disassembly of the compiled code.",
+    force: "Force recompilation even if no changes are detected.",
+    fetchDepsOnly: "Fetch dependencies only without building.",
+    skipFetchLatestGitDeps: "Skip fetching the latest git dependencies.",
+    dependenciesAreRoot: "Treat dependencies as root packages.",
+    silenceWarnings: "Ignore all warnings during the build process.",
+    warningsAreErrors: "Treat warnings as errors.",
+    jsonErrors: "Emit errors in JSON format.",
+    noLint: "Disable linters during the build process.",
+    lint: "Enable extra linters during the build process.",
+  };
+  return descriptions[key] || "No description available.";
 };

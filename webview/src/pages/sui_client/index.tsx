@@ -11,7 +11,7 @@ export default function SuiClient() {
     }, [navigate]);
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen bg-vscode-background">
             <main className="p-0">
                 <Outlet />
             </main>

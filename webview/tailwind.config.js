@@ -14,11 +14,12 @@ module.exports = {
           inputBorder: 'var(--vscode-input-border)',
           buttonBackground: 'var(--vscode-button-background)',
           buttonForeground: 'var(--vscode-button-foreground)',
-          buttonHoverBackground: 'var(--vscode-button-hoverBackground)',
+          buttonHoverBackground: "var(--vscode-button-hoverBackground, #1177bb)",
           errorForeground: 'var(--vscode-errorForeground)',
           focusBorder: 'var(--vscode-focusBorder)',
           editorWidgetBorder: 'var(--vscode-editorWidget-border)',
           selectionBackground: 'var(--vscode-editor-selectionBackground)',
+          editorForeground: 'var(--vscode-editor-foreground)',
         }
       },
       borderColor: {

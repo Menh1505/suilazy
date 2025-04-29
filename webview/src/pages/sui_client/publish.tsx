@@ -14,7 +14,6 @@ import {
 import { Loader2 } from "lucide-react";
 import { StatusDialog } from "../../components/status-dialog";
 
-// Add this type definition near the top of the file
 type MoveOptions = {
   dev: boolean;
   test: boolean;
@@ -37,14 +36,11 @@ export default function ClientPublish() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
-  
-  // Basic options
+
   const [packagePath, setPackagePath] = useState(".");
   const [gasBudget, setGasBudget] = useState("");
   const [gasObjectId, setGasObjectId] = useState("");
 
-  // Advanced options
   const [options, setOptions] = useState<MoveOptions>({
     dev: false,
     test: false,
@@ -102,23 +98,24 @@ export default function ClientPublish() {
 
   return (
     <TooltipProvider>
-      <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
+      <Card className="w-full min-h-screen border-[var(--vscode-editorWidget-border)] bg-[var(--vscode-editor-background)]/50">
         <CardContent className="p-6">
           <BackButton />
 
-          {/* Project Configuration Section */}
           <div className="mt-6 space-y-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-[var(--vscode-editor-foreground)]">
                   Publish Project
                 </h1>
-                <p className="text-gray-400 mt-1">Configure and Publish your Move package</p>
+                <p className="text-[var(--vscode-editor-foreground)]/70 mt-1">
+                  Configure and Publish your Move package
+                </p>
               </div>
               <Button
                 onClick={handlePublish}
                 disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6"
+                className="bg-[var(--vscode-button-background)] hover:bg-[var(--vscode-button-hoverBackground)] text-[var(--vscode-button-foreground)] px-6"
               >
                 {isLoading ? (
                   <div className="flex items-center">
@@ -131,40 +128,46 @@ export default function ClientPublish() {
               </Button>
             </div>
 
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Basic Settings */}
               <div className="space-y-6">
-                <div className="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
-                  <h2 className="text-lg font-medium mb-4">Basic Configuration</h2>
+                <div className="bg-[var(--vscode-editor-background)]/50 rounded-lg p-4 border border-[var(--vscode-editorWidget-border)]">
+                  <h2 className="text-lg font-medium text-[var(--vscode-editor-foreground)] mb-4">
+                    Basic Configuration
+                  </h2>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm text-gray-400">Package Path</label>
+                      <label className="text-sm text-[var(--vscode-editor-foreground)]/70">
+                        Package Path
+                      </label>
                       <Input
                         value={packagePath}
                         onChange={(e) => setPackagePath(e.target.value)}
                         placeholder="."
-                        className="bg-gray-900/50"
+                        className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-400">Gas Budget</label>
+                        <label className="text-sm text-[var(--vscode-editor-foreground)]/70">
+                          Gas Budget
+                        </label>
                         <Input
                           value={gasBudget}
                           onChange={(e) => setGasBudget(e.target.value)}
                           type="number"
                           placeholder="Optional"
-                          className="bg-gray-900/50"
+                          className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm text-gray-400">Gas Object ID</label>
+                        <label className="text-sm text-[var(--vscode-editor-foreground)]/70">
+                          Gas Object ID
+                        </label>
                         <Input
                           value={gasObjectId}
                           onChange={(e) => setGasObjectId(e.target.value)}
                           placeholder="Optional"
-                          className="bg-gray-900/50"
+                          className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                         />
                       </div>
                     </div>
@@ -172,11 +175,12 @@ export default function ClientPublish() {
                 </div>
               </div>
 
-              {/* Right Column - Advanced Options */}
               <div className="space-y-6">
-                <div className="bg-gray-800/40 rounded-lg p-4 border border-gray-700">
+                <div className="bg-[var(--vscode-editor-background)]/50 rounded-lg p-4 border border-[var(--vscode-editorWidget-border)]">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-medium">Advanced Options</h2>
+                    <h2 className="text-lg font-medium text-[var(--vscode-editor-foreground)]">
+                      Advanced Options
+                    </h2>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -199,7 +203,7 @@ export default function ClientPublish() {
                         };
                         setOptions(resetOptions);
                       }}
-                      className="text-gray-400 hover:text-white"
+                      className="text-[var(--vscode-editor-foreground)]/70 hover:text-[var(--vscode-editor-foreground)]"
                     >
                       Reset All
                     </Button>
@@ -209,30 +213,35 @@ export default function ClientPublish() {
                     {Object.entries(options).map(([key, value]) => (
                       <div
                         key={key}
-                        className={`flex items-center justify-between p-2 rounded transition-colors ${
-                          value ? "bg-blue-600/10 border border-blue-500/20" : "hover:bg-gray-700/30"
-                        }`}
+                        className={`flex items-center justify-between p-2 rounded transition-colors ${value
+                            ? "bg-[var(--vscode-button-background)]/10 border border-[var(--vscode-button-background)]/20"
+                            : "hover:bg-[var(--vscode-editor-background)]/30"
+                          }`}
                       >
                         <Tooltip>
                           <TooltipTrigger className="flex items-center space-x-2">
                             <div
-                              className={`w-2 h-2 rounded-full ${
-                                value ? "bg-blue-400" : "bg-gray-500"
-                              }`}
+                              className={`w-2 h-2 rounded-full ${value
+                                  ? "bg-[var(--vscode-button-foreground)]"
+                                  : "bg-[var(--vscode-editor-foreground)]/50"
+                                }`}
                             />
-                            <span className="text-sm">
+                            <span className="text-sm text-[var(--vscode-editor-foreground)]">
                               {key
                                 .replace(/([A-Z])/g, " $1")
                                 .split(" ")
                                 .map(
                                   (word) =>
-                                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                    word.charAt(0).toUpperCase() +
+                                    word.slice(1).toLowerCase()
                                 )
                                 .join(" ")}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="left" className="max-w-[250px]">
-                            <p className="text-sm">{getOptionDescription(key)}</p>
+                            <p className="text-sm text-[var(--vscode-editor-foreground)]">
+                              {getOptionDescription(key)}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                         <Switch
@@ -240,7 +249,10 @@ export default function ClientPublish() {
                           onCheckedChange={(checked) =>
                             setOptions((prev) => ({ ...prev, [key]: checked }))
                           }
-                          className={value ? "bg-blue-600" : "bg-gray-600"}
+                          className={`${value
+                              ? "bg-[var(--vscode-button-background)]"
+                              : "bg-[var(--vscode-editorWidget-border)]"
+                            }`}
                         />
                       </div>
                     ))}
@@ -250,14 +262,13 @@ export default function ClientPublish() {
             </div>
           </div>
 
-          {/* Result Section */}
-          <StatusDialog 
+          <StatusDialog
             open={dialogOpen}
             onOpenChange={setDialogOpen}
             loading={isLoading}
             status={{
               type: error ? "error" : "success",
-              message: error || result || ""
+              message: error || result || "",
             }}
           />
         </CardContent>

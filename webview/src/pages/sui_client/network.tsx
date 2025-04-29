@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { SuiCommand } from "../../utils/utils";
-import { RefreshCw } from "lucide-react"; // Add this import
+import { RefreshCw } from "lucide-react";
 
 const DEFAULT_NETWORKS = {
   devnet: "https://fullnode.devnet.sui.io:443",
@@ -86,14 +86,14 @@ export default function ClientNetwork() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black p-4">
-      <Card className="w-full border-gray-800 bg-gray-900/50">
+    <div className="min-h-screen bg-vscode-background p-4">
+      <Card className="w-full border-[var(--vscode-editorWidget-border)] bg-[var(--vscode-editor-background)]/50">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">Network Configuration</h2>
+            <h2 className="text-2xl font-bold text-[var(--vscode-editor-foreground)]">Network Configuration</h2>
             <Button
               variant="outline"
-              className="border-gray-700 hover:bg-red-800"
+              className="border-[var(--vscode-editorWidget-border)] hover:bg-[var(--vscode-button-hoverBackground)] hover:text-[var(--vscode-button-foreground)]"
               onClick={() => navigate("/")}
             >
               Back
@@ -102,26 +102,26 @@ export default function ClientNetwork() {
 
           <div className="space-y-6">
             {error && (
-              <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200">
+              <div className="p-4 bg-[var(--vscode-errorForeground)]/10 border border-[var(--vscode-errorForeground)] rounded-lg text-[var(--vscode-errorForeground)]">
                 {error}
               </div>
             )}
 
-            <div className="bg-gray-800/50 p-4 rounded-lg">
+            <div className="bg-[var(--vscode-editor-background)]/50 p-4 rounded-lg">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-white">Active Environments</h3>
+                <h3 className="text-lg font-semibold text-[var(--vscode-editor-foreground)]">Active Environments</h3>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={fetchEnvironments}
-                  className="h-8 w-8 text-gray-400 hover:text-white"
+                  className="h-8 w-8 text-[var(--vscode-editor-foreground)] hover:text-[var(--vscode-button-foreground)]"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>
               {cliOutput && (
-                <div className="mb-4 p-4 bg-gray-900/50 rounded border border-gray-700">
-                  <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono">
+                <div className="mb-4 p-4 bg-[var(--vscode-editor-background)]/50 rounded border border-[var(--vscode-editorWidget-border)]">
+                  <pre className="text-sm text-[var(--vscode-editor-foreground)] whitespace-pre-wrap font-mono">
                     {cliOutput}
                   </pre>
                 </div>
@@ -132,17 +132,17 @@ export default function ClientNetwork() {
                     key={env.alias}
                     onClick={() => switchEnvironment(env.alias)}
                     className={`p-4 rounded-lg border cursor-pointer transition-colors ${env.alias === activeEnv
-                      ? "border-blue-500 bg-blue-500/10"
-                      : "border-gray-700 hover:border-gray-600"
+                        ? "border-[var(--vscode-focusBorder)] bg-[var(--vscode-focusBorder)]/10"
+                        : "border-[var(--vscode-editorWidget-border)] hover:border-[var(--vscode-focusBorder)]"
                       }`}
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-white font-medium">{env.alias}</p>
-                        <p className="text-gray-400 text-sm">{env.url}</p>
+                        <p className="text-[var(--vscode-editor-foreground)] font-medium">{env.alias}</p>
+                        <p className="text-[var(--vscode-editor-foreground)]/70 text-sm">{env.url}</p>
                       </div>
                       {env.alias === activeEnv && (
-                        <div className="text-blue-500">Active</div>
+                        <div className="text-[var(--vscode-focusBorder)]">Active</div>
                       )}
                     </div>
                   </div>
@@ -150,15 +150,15 @@ export default function ClientNetwork() {
               </div>
             </div>
 
-            <div className="bg-gray-800/50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-white mb-4">Add New Environment</h3>
+            <div className="bg-[var(--vscode-editor-background)]/50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-[var(--vscode-editor-foreground)] mb-4">Add New Environment</h3>
               <div className="space-y-4">
                 <Input
                   type="text"
                   placeholder="Environment Alias"
                   value={newEnvAlias}
                   onChange={(e) => setNewEnvAlias(e.target.value)}
-                  className="bg-gray-700/50 border-gray-600"
+                  className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                 />
                 <div className="flex gap-2 mb-2">
                   {Object.entries(DEFAULT_NETWORKS).map(([network]) => (
@@ -166,7 +166,7 @@ export default function ClientNetwork() {
                       key={network}
                       onClick={() => setDefaultNetwork(network as keyof typeof DEFAULT_NETWORKS)}
                       variant="outline"
-                      className="flex-1 border-gray-700 hover:bg-gray-800"
+                      className="flex-1 border-[var(--vscode-editorWidget-border)] hover:bg-[var(--vscode-button-hoverBackground)] hover:text-[var(--vscode-button-foreground)]"
                     >
                       {network}
                     </Button>
@@ -177,11 +177,11 @@ export default function ClientNetwork() {
                   placeholder="RPC URL"
                   value={newEnvRpc}
                   onChange={(e) => setNewEnvRpc(e.target.value)}
-                  className="bg-gray-700/50 border-gray-600"
+                  className="bg-[var(--vscode-input-background)] border-[var(--vscode-input-border)]"
                 />
                 <Button
                   onClick={addEnvironment}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full bg-[var(--vscode-button-background)] hover:bg-[var(--vscode-button-hoverBackground)] text-[var(--vscode-button-foreground)]"
                 >
                   Add Environment
                 </Button>
