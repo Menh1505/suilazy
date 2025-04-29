@@ -113,7 +113,7 @@ export default function NetworkManager() {
       setError(null);
 
       if (message.type === "moveStatus" && message.status === "success") {
-        const { environments, activeEnv } = message.data;
+        const { environments } = message.data;
 
         const processedEnvs = environments
           .filter((env: { alias: string }) => {
@@ -204,11 +204,10 @@ export default function NetworkManager() {
                 {environments.map((env) => (
                   <div
                     key={env.alias}
-                    className={`p-4 rounded-lg border transition-colors ${
-                      env.active
+                    className={`p-4 rounded-lg border transition-colors ${env.active
                         ? "border-blue-500 bg-blue-500/10"
                         : "border-gray-700 hover:border-gray-600"
-                    }`}
+                      }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
@@ -216,14 +215,14 @@ export default function NetworkManager() {
                         <p className="text-sm text-gray-400">{env.url}</p>
                         {NETWORK_INFO[env.alias as keyof typeof NETWORK_INFO]
                           ?.description && (
-                          <p className="text-xs text-gray-500">
-                            {
-                              NETWORK_INFO[
-                                env.alias as keyof typeof NETWORK_INFO
-                              ].description
-                            }
-                          </p>
-                        )}
+                            <p className="text-xs text-gray-500">
+                              {
+                                NETWORK_INFO[
+                                  env.alias as keyof typeof NETWORK_INFO
+                                ].description
+                              }
+                            </p>
+                          )}
                       </div>
                       {!env.active && (
                         <Button
