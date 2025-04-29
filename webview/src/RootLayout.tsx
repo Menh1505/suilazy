@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 
 export const RootLayout = () => {
   return (
-    <div className="min-h-screen bg-vscode-background">
+    <div className="max-h-screen bg-vscode-background">
       <main>
         <Outlet />
         {/* <PathTracker /> */}

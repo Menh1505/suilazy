@@ -2,13 +2,6 @@ import icon from './assets/sui-sui-logo.svg'
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card'
 import { Button } from './components/ui/button'
 import { useNavigate } from 'react-router-dom'
-import { vscodeApi } from './utils/utils'
-
-declare global {
-  interface Window {
-    vscode: vscodeApi
-  }
-}
 
 function App() {
   const navigate = useNavigate();
