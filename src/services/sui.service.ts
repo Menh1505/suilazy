@@ -17,7 +17,7 @@ interface VersionInfo {
   warnings?: string[];
 }
 
-async function getWorkingDirectory(): Promise<string> {
+export async function getWorkingDirectory(): Promise<string> {
   if (currentProjectDir) {
     return currentProjectDir;
   }
@@ -264,7 +264,9 @@ export async function SuiMoveTest(webview: vscode.Webview): Promise<string> {
   }
 }
 
-export async function SuiCLientPublish(webview: vscode.Webview): Promise<string> {
+export async function SuiCLientPublish(
+  webview: vscode.Webview
+): Promise<string> {
   const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
   console.log("Handling MovePublish:", workspacePath);
 
@@ -287,23 +289,23 @@ export async function SuiCLientPublish(webview: vscode.Webview): Promise<string>
 
     // Parse and format the output
     const formattedOutput = parsePublishOutput(output, warnings);
-    
+
     // Send success status to webview
     webview.postMessage({
       type: "moveStatus",
       status: "success",
-      message: formattedOutput
+      message: formattedOutput,
     });
 
     return formattedOutput;
   } catch (error: any) {
     console.error("❌ CLI error:", error);
-    
+
     // Send error status to webview
     webview.postMessage({
       type: "moveStatus",
       status: "error",
-      message: `Failed to publish Move project: ${error.message}`
+      message: `Failed to publish Move project: ${error.message}`,
     });
 
     throw new Error(`Sui move publish failed: ${error.message}`);
@@ -312,7 +314,7 @@ export async function SuiCLientPublish(webview: vscode.Webview): Promise<string>
 
 function parsePublishOutput(output: string, warnings: string[]): string {
   let result = output;
-  
+
   // Add any version mismatch warnings at the beginning
   if (warnings.length > 0) {
     result = warnings.join("\n") + "\n\n" + result;
@@ -357,33 +359,5 @@ export async function SuiClientEnvs(): Promise<{
     return { list: envs, active: activeEnv };
   } catch (error: any) {
     throw new Error(`Failed to get environments: ${error.message}`);
-  }
-}
-
-export async function SuiClientSwitch(env: string): Promise<string> {
-  try {
-    const workingDir = await getWorkingDirectory();
-    const { stdout } = await execAsync(`sui client switch --env ${env}`, {
-      cwd: workingDir,
-    });
-    return stdout;
-  } catch (error: any) {
-    throw new Error(`Failed to switch environment: ${error.message}`);
-  }
-}
-
-export async function SuiClientNewEnv(
-  alias: string,
-  rpc: string
-): Promise<string> {
-  try {
-    const workingDir = await getWorkingDirectory();
-    const { stdout } = await execAsync(
-      `sui client new-env --alias ${alias} --rpc ${rpc}`,
-      { cwd: workingDir }
-    );
-    return stdout;
-  } catch (error: any) {
-    throw new Error(`Failed to add new environment: ${error.message}`);
   }
 }

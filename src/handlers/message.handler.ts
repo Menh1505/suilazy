@@ -1,13 +1,7 @@
 import * as vscode from "vscode";
 import { HandleSuiVersion } from "./command.handler";
-import {
-  HandleMoveNew,
-  HandleMoveBuild,
-  HandleMoveTest,
-} from "./move.handler";
-import {
-  HandleClientPublish
-} from "./client.handler";
+import { HandleMoveNew, HandleMoveBuild, HandleMoveTest } from "./move.handler";
+import { HandleClientPublish } from "./client.handler";
 import {
   HandleFetchEnvironments,
   HandleSwitchEnvironment,
@@ -54,8 +48,11 @@ export function ReceiveMessageHandler(
       HandleFetchEnvironments(webview);
       break;
     case SuiCommand.CLIENT_SWITCH:
-      if (typeof message.data === "string") {
-        HandleSwitchEnvironment(webview, message.data);
+      console.log("check newwork env", message.data.env);
+      if (typeof message.data.env === "string") {
+        console.log("check newwork trong", message.data);
+
+        HandleSwitchEnvironment(webview, message.data.env);
       } else {
         webview.postMessage({
           type: "error",

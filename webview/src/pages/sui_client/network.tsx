@@ -1,81 +1,144 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 import { SuiCommand } from "../../utils/utils";
-import { RefreshCw } from "lucide-react"; // Add this import
+import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/ui/tabs";
+import { StatusDialog } from "../../components/status-dialog";
 
-const DEFAULT_NETWORKS = {
-  devnet: "https://fullnode.devnet.sui.io:443",
-  testnet: "https://fullnode.testnet.sui.io:443",
-  mainnet: "https://fullnode.mainnet.sui.io:443",
+const NETWORK_INFO = {
+  devnet: {
+    url: "https://fullnode.devnet.sui.io:443",
+    description: "Deployed every week on Mondays",
+  },
+  testnet: {
+    url: "https://fullnode.testnet.sui.io:443",
+    description: "Deployed every week on Tuesdays",
+  },
+  mainnet: {
+    url: "https://fullnode.mainnet.sui.io:443",
+    description: "Deployed every two weeks on Wednesdays",
+  },
 };
 
-export default function ClientNetwork() {
-  const [environments, setEnvironments] = useState<{ alias: string; url: string; active: boolean }[]>([]);
-  const [activeEnv, setActiveEnv] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [newEnvAlias, setNewEnvAlias] = useState("");
-  const [newEnvRpc, setNewEnvRpc] = useState("");
-  const [cliOutput, setCliOutput] = useState<string>("");
+export default function NetworkManager() {
+  const [environments, setEnvironments] = React.useState<
+    Array<{
+      alias: string;
+      url: string;
+      active: boolean;
+    }>
+  >([]);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [newEnv, setNewEnv] = React.useState({ alias: "", url: "" });
+  const [activeTab, setActiveTab] = React.useState<"switch" | "custom">(
+    "switch"
+  );
+  const [statusDialogOpen, setStatusDialogOpen] = React.useState(false);
+  const [status, setStatus] = React.useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
   const navigate = useNavigate();
 
-  const fetchEnvironments = () => {
-    console.log("Fetching environments...");
+  const fetchEnvironments = React.useCallback(() => {
+    setLoading(true);
     window.vscode.postMessage({ command: SuiCommand.CLIENT_ENVS });
-  };
+  }, []);
 
-  const switchEnvironment = (env: string) => {
-    console.log("Switching to environment:", env);
-    window.vscode.postMessage({ command: SuiCommand.CLIENT_SWITCH, data: { env } });
-  };
+  const handleSwitchEnv = React.useCallback(
+    (env: string) => {
+      setLoading(true);
+      window.vscode.postMessage({
+        command: SuiCommand.CLIENT_SWITCH,
+        data: { env },
+      });
 
-  const addEnvironment = () => {
-    if (!newEnvAlias || !newEnvRpc) {
-      setError("Please provide both alias and RPC URL.");
+      const messageHandler = (event: MessageEvent) => {
+        const message = event.data;
+        if (message.type === "moveStatus" && message.status === "success") {
+          fetchEnvironments();
+          window.removeEventListener("message", messageHandler);
+        }
+      };
+
+      window.addEventListener("message", messageHandler);
+    },
+    [fetchEnvironments]
+  );
+
+  const handleAddEnv = React.useCallback(() => {
+    if (!newEnv.alias || !newEnv.url) {
+      setError("Please provide both alias and RPC URL");
       return;
     }
-    console.log("Adding new environment:", { alias: newEnvAlias, rpc: newEnvRpc });
+    setLoading(true);
     window.vscode.postMessage({
       command: SuiCommand.CLIENT_NEW_ENV,
-      data: { alias: newEnvAlias, rpc: newEnvRpc },
+      data: {
+        alias: newEnv.alias,
+        rpc: newEnv.url,
+      },
     });
-    setNewEnvAlias("");
-    setNewEnvRpc("");
-  };
+    setNewEnv({ alias: "", url: "" });
+  }, [newEnv]);
 
-  const setDefaultNetwork = (network: keyof typeof DEFAULT_NETWORKS) => {
-    setNewEnvRpc(DEFAULT_NETWORKS[network]);
-  };
-
-  useEffect(() => {
+  React.useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
-      console.log("Received message:", message);
+      setLoading(false);
 
       if (message.type === "error") {
-        console.error("Error received:", message.message);
         setError(message.message);
-      } else {
-        setError(null);
-        if (message.type === "moveStatus" && message.data?.cliOutput) {
-          setCliOutput(message.data.cliOutput);
-        }
-        if (message.type === "envs") {
-          console.log("Environment list:", message.environments);
-          console.log("Active environment:", message.activeEnv);
-          setEnvironments(message.environments);
-          setActiveEnv(message.activeEnv);
-        }
-        if (message.type === "switchEnv") {
-          console.log("Switched to environment:", message.activeEnv);
-          setActiveEnv(message.activeEnv);
-        }
-        if (message.type === "newEnv") {
-          console.log("New environment added, refreshing list...");
-          fetchEnvironments();
-        }
+        setStatus({ type: "error", message: message.message });
+        setStatusDialogOpen(true);
+        return;
+      }
+
+      setError(null);
+
+      if (message.type === "moveStatus" && message.status === "success") {
+        const { environments, activeEnv } = message.data;
+
+        const processedEnvs = environments
+          .filter((env: { alias: string }) => {
+            return (
+              env.alias.startsWith("│") &&
+              !env.alias.includes("├") &&
+              !env.alias.includes("╰") &&
+              !env.alias.includes("alias")
+            );
+          })
+          .map((env: { alias: string }) => {
+            const parts = env.alias.split("│").map((part) => part.trim());
+            return {
+              alias: parts[1],
+              url: parts[2],
+              active: parts[3] === "*",
+            };
+          });
+
+        setEnvironments(processedEnvs);
+        setStatus({
+          type: "success",
+          message: message.message,
+        });
+        setStatusDialogOpen(true);
       }
     };
 
@@ -83,113 +146,186 @@ export default function ClientNetwork() {
     fetchEnvironments();
 
     return () => window.removeEventListener("message", messageHandler);
-  }, []);
+  }, [fetchEnvironments]);
 
   return (
-    <div className="min-h-screen bg-black p-4">
-      <Card className="w-full border-gray-800 bg-gray-900/50">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">Network Configuration</h2>
-            <Button
-              variant="outline"
-              className="border-gray-700 hover:bg-red-800"
-              onClick={() => navigate("/")}
-            >
-              Back
-            </Button>
-          </div>
+    <Card className="min-h-screen border-gray-800 bg-gray-900/50">
+      <CardHeader className="border-b border-gray-800">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Network Manager
+          </CardTitle>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/")}
+            className="border-gray-700"
+          >
+            Back
+          </Button>
+        </div>
+      </CardHeader>
 
-          <div className="space-y-6">
-            {error && (
-              <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200">
-                {error}
-              </div>
-            )}
+      <CardContent className="p-6 space-y-6">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-            <div className="bg-gray-800/50 p-4 rounded-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-white">Active Environments</h3>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as "switch" | "custom")}
+        >
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
+            <TabsTrigger value="switch">Switch Network</TabsTrigger>
+            <TabsTrigger value="custom">Custom Network</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="switch" className="space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-white">
+                  Available Networks
+                </h3>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={fetchEnvironments}
-                  className="h-8 w-8 text-gray-400 hover:text-white"
+                  disabled={loading}
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw
+                    className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                  />
                 </Button>
               </div>
-              {cliOutput && (
-                <div className="mb-4 p-4 bg-gray-900/50 rounded border border-gray-700">
-                  <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono">
-                    {cliOutput}
-                  </pre>
-                </div>
-              )}
-              <div className="space-y-2">
+
+              <div className="grid gap-4">
                 {environments.map((env) => (
                   <div
                     key={env.alias}
-                    onClick={() => switchEnvironment(env.alias)}
-                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${env.alias === activeEnv
-                      ? "border-blue-500 bg-blue-500/10"
-                      : "border-gray-700 hover:border-gray-600"
-                      }`}
+                    className={`p-4 rounded-lg border transition-colors ${
+                      env.active
+                        ? "border-blue-500 bg-blue-500/10"
+                        : "border-gray-700 hover:border-gray-600"
+                    }`}
                   >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-white font-medium">{env.alias}</p>
-                        <p className="text-gray-400 text-sm">{env.url}</p>
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <p className="font-medium text-white">{env.alias}</p>
+                        <p className="text-sm text-gray-400">{env.url}</p>
+                        {NETWORK_INFO[env.alias as keyof typeof NETWORK_INFO]
+                          ?.description && (
+                          <p className="text-xs text-gray-500">
+                            {
+                              NETWORK_INFO[
+                                env.alias as keyof typeof NETWORK_INFO
+                              ].description
+                            }
+                          </p>
+                        )}
                       </div>
-                      {env.alias === activeEnv && (
-                        <div className="text-blue-500">Active</div>
+                      {!env.active && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSwitchEnv(env.alias)}
+                          disabled={loading}
+                          className="border-gray-700"
+                        >
+                          Switch
+                        </Button>
+                      )}
+                      {env.active && (
+                        <span className="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded">
+                          Active
+                        </span>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          </TabsContent>
 
-            <div className="bg-gray-800/50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-white mb-4">Add New Environment</h3>
-              <div className="space-y-4">
-                <Input
-                  type="text"
-                  placeholder="Environment Alias"
-                  value={newEnvAlias}
-                  onChange={(e) => setNewEnvAlias(e.target.value)}
-                  className="bg-gray-700/50 border-gray-600"
-                />
-                <div className="flex gap-2 mb-2">
-                  {Object.entries(DEFAULT_NETWORKS).map(([network]) => (
+          <TabsContent value="custom" className="space-y-4">
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-white">
+                Add New Network
+              </h3>
+
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="alias">Network Alias</Label>
+                  <Input
+                    id="alias"
+                    value={newEnv.alias}
+                    onChange={(e) =>
+                      setNewEnv((prev) => ({ ...prev, alias: e.target.value }))
+                    }
+                    placeholder="e.g., localnet"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="url">RPC URL</Label>
+                  <Input
+                    id="url"
+                    value={newEnv.url}
+                    onChange={(e) =>
+                      setNewEnv((prev) => ({ ...prev, url: e.target.value }))
+                    }
+                    placeholder="https://fullnode.network.sui.io:443"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  {Object.entries(NETWORK_INFO).map(([network, info]) => (
                     <Button
                       key={network}
-                      onClick={() => setDefaultNetwork(network as keyof typeof DEFAULT_NETWORKS)}
                       variant="outline"
-                      className="flex-1 border-gray-700 hover:bg-gray-800"
+                      onClick={() =>
+                        setNewEnv({ alias: network, url: info.url })
+                      }
+                      className="flex-1 border-gray-700"
                     >
                       {network}
                     </Button>
                   ))}
                 </div>
-                <Input
-                  type="text"
-                  placeholder="RPC URL"
-                  value={newEnvRpc}
-                  onChange={(e) => setNewEnvRpc(e.target.value)}
-                  className="bg-gray-700/50 border-gray-600"
-                />
+
                 <Button
-                  onClick={addEnvironment}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleAddEnv}
+                  disabled={loading || !newEnv.alias || !newEnv.url}
+                  className="w-full"
                 >
-                  Add Environment
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add Network"
+                  )}
                 </Button>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+
+      <StatusDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        loading={loading}
+        status={status}
+        loadingTitle="Processing..."
+        loadingMessage="Please wait while processing..."
+        successTitle="Operation Successful"
+        errorTitle="Operation Failed"
+      />
+    </Card>
   );
 }

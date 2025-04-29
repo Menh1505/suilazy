@@ -259,18 +259,16 @@ export default function MoveBuild() {
                     }).map(([key, value]) => (
                       <div
                         key={key}
-                        className={`flex items-center justify-between p-2 rounded transition-colors ${
-                          value
+                        className={`flex items-center justify-between p-2 rounded transition-colors ${value
                             ? "bg-blue-600/10 border border-blue-500/20"
                             : "hover:bg-gray-700/30"
-                        }`}
+                          }`}
                       >
                         <Tooltip>
                           <TooltipTrigger className="flex items-center space-x-2">
                             <div
-                              className={`w-2 h-2 rounded-full ${
-                                value ? "bg-blue-400" : "bg-gray-500"
-                              }`}
+                              className={`w-2 h-2 rounded-full ${value ? "bg-blue-400" : "bg-gray-500"
+                                }`}
                             />
                             <span className="text-sm">
                               {key
@@ -309,11 +307,10 @@ export default function MoveBuild() {
           <div className="mt-6">
             {cliStatus.message && (
               <div
-                className={`p-4 rounded-lg ${
-                  cliStatus.type === "success"
+                className={`p-4 rounded-lg ${cliStatus.type === "success"
                     ? "bg-green-900/20 border border-green-800"
                     : "bg-red-900/20 border border-red-800"
-                }`}
+                  }`}
               >
                 <p className="text-sm">
                   {cliStatus.type === "success" ? "✅ " : "❌ "}
@@ -336,7 +333,7 @@ export default function MoveBuild() {
         errorTitle="Build Failed"
         successAction={{
           label: "Go to Publish",
-          onClick: () => navigate("/publish"),
+          onClick: () => navigate("/client/publish"),
         }}
       />
     </TooltipProvider>
