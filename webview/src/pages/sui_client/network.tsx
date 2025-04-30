@@ -50,19 +50,25 @@ export default function NetworkManager() {
     "switch"
   );
   const [statusDialogOpen, setStatusDialogOpen] = React.useState(false);
+
   const [status, setStatus] = React.useState<{
-    type: "success" | "error" | null;
+    type: "success" | "error";
     message: string;
-  }>({ type: null, message: "" });
+  }>({
+    type: "success",
+    message: "",
+  });
   const navigate = useNavigate();
 
   const fetchEnvironments = React.useCallback(() => {
+    console.log("Fetching environments...");
     setLoading(true);
     window.vscode.postMessage({ command: SuiCommand.CLIENT_ENVS });
   }, []);
 
   const handleSwitchEnv = React.useCallback(
     (env: string) => {
+      console.log("Switching to environment:", env);
       setLoading(true);
       window.vscode.postMessage({
         command: SuiCommand.CLIENT_SWITCH,
@@ -71,7 +77,9 @@ export default function NetworkManager() {
 
       const messageHandler = (event: MessageEvent) => {
         const message = event.data;
+        console.log("Received message from vscode:", message);
         if (message.type === "moveStatus" && message.status === "success") {
+          console.log("Environment switched successfully");
           fetchEnvironments();
           window.removeEventListener("message", messageHandler);
         }
@@ -83,7 +91,9 @@ export default function NetworkManager() {
   );
 
   const handleAddEnv = React.useCallback(() => {
+    console.log("Adding new environment:", newEnv);
     if (!newEnv.alias || !newEnv.url) {
+      console.error("Error: Alias and RPC URL are required");
       setError("Please provide both alias and RPC URL");
       return;
     }
@@ -95,15 +105,45 @@ export default function NetworkManager() {
         rpc: newEnv.url,
       },
     });
-    setNewEnv({ alias: "", url: "" });
-  }, [newEnv]);
+
+    const messageHandler = (event: MessageEvent) => {
+      const message = event.data;
+      console.log("Received message from vscode:", message);
+
+      if (message.type === "moveStatus") {
+        if (message.status === "success") {
+          console.log("Environment added successfully");
+          setStatus({
+            type: "success",
+            message: message.message,
+          });
+          setStatusDialogOpen(true);
+          fetchEnvironments();
+        } else if (message.status === "error") {
+          console.error("Error adding environment:", message.message);
+          setError(message.message);
+          setStatus({
+            type: "error",
+            message: message.message,
+          });
+          setStatusDialogOpen(true);
+        }
+        setLoading(false);
+        window.removeEventListener("message", messageHandler);
+      }
+    };
+
+    window.addEventListener("message", messageHandler);
+  }, [newEnv, fetchEnvironments]);
 
   React.useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
+      console.log("Received message from vscode:", message);
       setLoading(false);
 
       if (message.type === "error") {
+        console.error("Error:", message.message);
         setError(message.message);
         setStatus({ type: "error", message: message.message });
         setStatusDialogOpen(true);
@@ -114,6 +154,7 @@ export default function NetworkManager() {
 
       if (message.type === "moveStatus" && message.status === "success") {
         const { environments } = message.data;
+        console.log("Environments data received:", environments);
 
         const processedEnvs = environments
           .filter((env: { alias: string }) => {
@@ -133,6 +174,7 @@ export default function NetworkManager() {
             };
           });
 
+        console.log("Processed environments:", processedEnvs);
         setEnvironments(processedEnvs);
         setStatus({
           type: "success",
@@ -142,10 +184,14 @@ export default function NetworkManager() {
       }
     };
 
+    console.log("Adding message event listener");
     window.addEventListener("message", messageHandler);
     fetchEnvironments();
 
-    return () => window.removeEventListener("message", messageHandler);
+    return () => {
+      console.log("Removing message event listener");
+      window.removeEventListener("message", messageHandler);
+    };
   }, [fetchEnvironments]);
 
   return (
@@ -204,10 +250,11 @@ export default function NetworkManager() {
                 {environments.map((env) => (
                   <div
                     key={env.alias}
-                    className={`p-4 rounded-lg border transition-colors ${env.active
+                    className={`p-4 rounded-lg border transition-colors ${
+                      env.active
                         ? "border-blue-500 bg-blue-500/10"
                         : "border-gray-700 hover:border-gray-600"
-                      }`}
+                    }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
@@ -215,14 +262,14 @@ export default function NetworkManager() {
                         <p className="text-sm text-gray-400">{env.url}</p>
                         {NETWORK_INFO[env.alias as keyof typeof NETWORK_INFO]
                           ?.description && (
-                            <p className="text-xs text-gray-500">
-                              {
-                                NETWORK_INFO[
-                                  env.alias as keyof typeof NETWORK_INFO
-                                ].description
-                              }
-                            </p>
-                          )}
+                          <p className="text-xs text-gray-500">
+                            {
+                              NETWORK_INFO[
+                                env.alias as keyof typeof NETWORK_INFO
+                              ].description
+                            }
+                          </p>
+                        )}
                       </div>
                       {!env.active && (
                         <Button
