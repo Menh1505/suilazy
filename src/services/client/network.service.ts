@@ -1,56 +1,125 @@
-import { promisify } from "util";
-import { exec } from "child_process";
+import { getCurrentWorkspaceFolder } from "../../utils/workspace.manager";
+import * as vscode from "vscode";
+import processCLI from "../excute";
 
-import { getWorkingDirectory } from "../sui.service";
-
-const execAsync = promisify(exec);
-
-export async function SuiClientSwitch(env: string): Promise<string> {
-  try {
-    const workingDir = await getWorkingDirectory();
-    const { stdout } = await execAsync(`sui client switch --env ${env}`, {
-      cwd: workingDir,
-    });
-    return stdout;
-  } catch (error: any) {
-    throw new Error(`Failed to switch environment: ${error.message}`);
-  }
-}
-
-export async function SuiClientNewEnv(
-  alias: string,
-  rpc: string
+export async function SuiClientSwitch(
+  webview: vscode.Webview,
+  env: string
 ): Promise<string> {
-  console.log("Adding new environmentfasfasfasf:", alias, rpc);
+  const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
+  console.log("Handling Switch Environment:", workspacePath);
+
+  if (!workspacePath) {
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: message || "No workspace path found.",
+    });
+    throw new Error(message || "No workspace path found.");
+  }
+
+  console.log("Switching to environment:", env);
   try {
-    const workingDir = await getWorkingDirectory();
-    const { stdout } = await execAsync(
-      `sui client new-env --alias=${alias} --rpc ${rpc}`,
-      { cwd: workingDir }
+    const output = await processCLI(
+      "sui",
+      ["client", "switch", "--env", env],
+      workspacePath
     );
-    return stdout;
-  } catch (error: any) {
-    throw new Error(`Failed to add new environment: ${error.message}`);
+    console.log("✅ CLI output:", output);
+    webview.postMessage({
+      type: "moveStatus",
+      status: "success",
+      message: `Switched to environment ${env} successfully`,
+    });
+    return output;
+  } catch (error) {
+    console.error("❌ CLI error:", error);
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: `Failed to switch environment: ${error}`,
+    });
+    throw new Error(`Failed to switch environment: ${error}`);
   }
 }
 
-export async function SuiClientEnvs(): Promise<{
-  list: any[];
-  active: string;
-}> {
-  try {
-    const workingDir = await getWorkingDirectory();
-    const { stdout } = await execAsync("sui client envs", {
-      cwd: workingDir,
+export async function SuiClientEnvs(webview: vscode.Webview): Promise<void> {
+  const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
+  console.log("Handling List Environments:", workspacePath);
+
+  if (!workspacePath) {
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: message || "No workspace path found.",
     });
-    const lines = stdout.split("\n").filter((line) => line.trim());
+    throw new Error(message || "No workspace path found.");
+  }
+
+  console.log("Listing environments");
+  try {
+    const output = await processCLI("sui", ["client", "envs"], workspacePath);
+    console.log("✅ CLI output:", output);
+    const lines = output.split("\n").filter((line) => line.trim());
     const envs = lines.slice(1).map((line) => {
       const [alias, url, active] = line.split("|").map((s) => s.trim());
       return { alias, url, active: active === "*" };
     });
     const activeEnv = envs.find((env) => env.active)?.alias || "";
-    return { list: envs, active: activeEnv };
-  } catch (error: any) {
-    throw new Error(`Failed to get environments: ${error.message}`);
+    webview.postMessage({
+      type: "moveStatus",
+      status: "success",
+      message: "Environments listed successfully",
+      data: {
+        environments: envs,
+        activeEnv: activeEnv,
+      },
+    });
+  } catch (error) {
+    console.error("❌ CLI error:", error);
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: `Failed to list environments: ${error}`,
+    });
+  }
+}
+
+export async function SuiClientNewEnv(
+  webview: vscode.Webview,
+  data: { alias: string; rpc: string }
+): Promise<void> {
+  const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
+  console.log("Handling New Environment:", workspacePath);
+
+  if (!workspacePath) {
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: message || "No workspace path found.",
+    });
+    throw new Error(message || "No workspace path found.");
+  }
+
+  console.log("Adding new environment:", data);
+  try {
+    const output = await processCLI(
+      "sui",
+      ["client", "new-env", `--alias=${data.alias}`, `--rpc=${data.rpc}`],
+      workspacePath
+    );
+    console.log("✅ CLI output:", output);
+    webview.postMessage({
+      type: "moveStatus",
+      status: "success",
+      message: "Environment added successfully",
+    });
+  } catch (error) {
+    console.error("❌ CLI error:", error);
+    webview.postMessage({
+      type: "moveStatus",
+      status: "error",
+      message: `Failed to add new environment: ${error}`,
+    });
   }
 }

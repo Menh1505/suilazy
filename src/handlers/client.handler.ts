@@ -1,11 +1,5 @@
 import * as vscode from "vscode";
-import {
-  SuiCLientPublish,
-} from "../services/sui.service";
-import { MoveInitRequest } from "../types/move/init.type";
-import { getWorkSpacePath } from "../utils/path";
-import { validateWorkspace } from "../utils/workspace.check";
-
+import { SuiCLientPublish } from "../services/sui.service";
 
 export async function HandleClientPublish(webview: vscode.Webview) {
   console.log("Handling MovePublish");
