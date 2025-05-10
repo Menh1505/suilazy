@@ -85,3 +85,26 @@ export class StorageProvider {
         }
     }
 }
+
+let storageProvider: StorageProvider | undefined;
+
+/**
+ * Initializes the StorageProvider singleton.
+ * @param context The extension context provided by VS Code.
+ */
+export function initializeStorageProvider(context: vscode.ExtensionContext) {
+    if (!storageProvider) {
+        storageProvider = new StorageProvider(context);
+    }
+}
+
+/**
+ * Gets the StorageProvider singleton instance.
+ * @returns The StorageProvider instance.
+ */
+export function getStorageProvider(): StorageProvider {
+    if (!storageProvider) {
+        throw new Error('StorageProvider has not been initialized. Call initializeStorageProvider first.');
+    }
+    return storageProvider;
+}
