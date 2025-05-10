@@ -18,5 +18,12 @@ export interface MoveInitRequest {
     jsonErrors: boolean;
     noLint: boolean;
     lint: boolean;
+    gasBudget?: string;
+    gas?: string;
+    dryRun?: boolean;
+    devInspect?: boolean;
+    skipDependencyVerification?: boolean;
+    withUnpublishedDependencies?: boolean;
+    json?: boolean;
   };
 }

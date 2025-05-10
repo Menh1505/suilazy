@@ -8,7 +8,7 @@ export function BackButton() {
       <Button
         onClick={() => navigate(-1)}
         variant="outline"
-        className="h-12 flex items-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-red-800"
+        className="h-12 flex items-center gap-2 border-[var(--vscode-editorWidget-border)] bg-[var(--vscode-editor-background)] hover:bg-[var(--vscode-button-hoverBackground)] hover:text-[var(--vscode-button-foreground)]"
       >
         Back
       </Button>

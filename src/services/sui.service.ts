@@ -79,53 +79,51 @@ async function checkVersionCompatibility(): Promise<string[]> {
   }
 }
 
-export async function SuiCLientPublish(
-  webview: vscode.Webview
-): Promise<string> {
-  const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
-  console.log("Handling MovePublish:", workspacePath);
+// export async function SuiCLientPublish(
+//   webview: vscode.Webview
+// ): Promise<string> {
+//   const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
+//   console.log("Handling MovePublish:", workspacePath);
 
-  if (!workspacePath) {
-    throw new Error(message || "No workspace path found.");
-  }
+//   if (!workspacePath) {
+//     throw new Error(message || "No workspace path found.");
+//   }
 
-  const command = "sui";
-  const cmdArgs: string[] = ["client", "publish"];
-  cmdArgs.push("--gas-budget", "100000000"); // Default gas budget
+//   const command = "sui";
+//   const cmdArgs: string[] = ["client", "publish"];
+//   cmdArgs.push("--gas-budget", "100000000"); // Default gas budget
 
-  try {
-    // Check version compatibility first
-    const warnings = await checkVersionCompatibility();
-    console.log("Version compatibility check warnings:", warnings);
+//   try {
+//     // Check version compatibility first
+//     const warnings = await checkVersionCompatibility();
+//     console.log("Version compatibility check warnings:", warnings);
 
-    // Execute publish command
-    const output = await processCLI(command, cmdArgs, workspacePath);
-    console.log("✅ CLI output:", output);
+//     // Execute publish command
+//     const output = await processCLI(command, cmdArgs, workspacePath);
+//     console.log("✅ CLI output:", output);
 
-    // Parse and format the output
-    const formattedOutput = parsePublishOutput(output, warnings);
+//     // Parse and format the output
+//     const formattedOutput = parsePublishOutput(output, warnings);
 
-    // Send success status to webview
-    webview.postMessage({
-      type: "moveStatus",
-      status: "success",
-      message: formattedOutput,
-    });
+//     // Send success status to webview
+//     webview.postMessage({
+//       type: "moveStatus",
+//       status: "success",
+//       message: formattedOutput,
+//     });
 
-    return formattedOutput;
-  } catch (error: any) {
-    console.error("❌ CLI error:", error);
+//     return formattedOutput;
+//   } catch (error: any) {
+//     console.error("❌ CLI error:", error);
 
-    // Send error status to webview
-    webview.postMessage({
-      type: "moveStatus",
-      status: "error",
-      message: `Failed to publish Move project: ${error.message}`,
-    });
-
-    throw new Error(`Sui move publish failed: ${error.message}`);
-  }
-}
+//     // Send error status to webview
+//     webview.postMessage({
+//       type: "moveStatus",
+//       status: "error",
+//       message: `Failed to publish Move project: ${error.message}`,
+//     });
+//   }
+// }
 
 function parsePublishOutput(output: string, warnings: string[]): string {
   let result = output;

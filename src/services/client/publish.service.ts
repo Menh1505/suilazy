@@ -1,13 +1,15 @@
 import { getCurrentWorkspaceFolder } from "../../utils/workspace.manager";
 import * as vscode from "vscode";
+import * as path from "path";
 import { MoveInitRequest } from "../../types/move/init.type";
 import processCLI from "../excute";
-export async function SuiMoveBuild(
+export async function SuiClientPublish(
   webview: vscode.Webview,
   data: MoveInitRequest
 ): Promise<void> {
   const { path: workspacePath, message } = getCurrentWorkspaceFolder(webview);
-  console.log("Handling MoveBuild:", workspacePath);
+  console.log("Handling MovePublish workspacePath:", workspacePath);
+  console.log("Handling MovePublish:", data);
 
   if (!workspacePath) {
     webview.postMessage({
@@ -22,7 +24,7 @@ export async function SuiMoveBuild(
 
   // Build command string with options
   const command = "sui";
-  const cmdArgs: string[] = ["move", "build"];
+  const cmdArgs: string[] = ["client", "publish"];
 
   // Add package path if specified
   if (packagePath) {
@@ -79,6 +81,35 @@ export async function SuiMoveBuild(
     cmdArgs.push("--lint");
   }
 
+  // Bổ sung các tham số mới cho publish
+  if (options.gas) {
+    cmdArgs.push(`--gas "${options.gas}"`);
+  }
+  if (options.gasBudget) {
+    cmdArgs.push(`--gas-budget "${options.gasBudget}"`);
+  }
+  if (options.dryRun) {
+    cmdArgs.push("--dry-run");
+  }
+  if (options.devInspect) {
+    cmdArgs.push("--dev-inspect");
+  }
+  if (options.skipDependencyVerification) {
+    cmdArgs.push("--skip-dependency-verification");
+  }
+  if (options.withUnpublishedDependencies) {
+    cmdArgs.push("--with-unpublished-dependencies");
+  }
+  if (options.json) {
+    cmdArgs.push("--json");
+  }
+  if (options.serializeUnsignedTransaction) {
+    cmdArgs.push("--serialize-unsigned-transaction");
+  }
+  if (options.serializeSignedTransaction) {
+    cmdArgs.push("--serialize-signed-transaction");
+  }
+
   console.log("Executing command:", command, cmdArgs.join(" "));
 
   try {
@@ -87,14 +118,14 @@ export async function SuiMoveBuild(
     webview.postMessage({
       type: "moveStatus",
       status: "success",
-      message: `Build completed successfully. ${output}`,
+      message: `Publish completed successfully. ${output}`,
     });
   } catch (error) {
     console.error("❌ CLI error:", error);
     webview.postMessage({
       type: "moveStatus",
       status: "error",
-      message: `Sui move build failed: ${error}`,
+      message: `Sui move publish failed: ${error}`,
     });
   }
 }

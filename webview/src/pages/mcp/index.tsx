@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { FileEditor } from "../../components/FileEditor";
 import { Button } from "../../components/ui/button";
 import { SuiCommand } from "../../types/move/command.type";
-
+import { StatusDialog } from "../../components/status-dialog";
+import { Card, CardContent } from "../../components/ui/card";
+import { useNavigate } from "react-router-dom";
 interface MarkdownFile {
   path: string;
   content: string;
@@ -15,6 +17,8 @@ export default function MCP() {
     message: string;
   }>({ type: null, message: "" });
   const [showDialog, setShowDialog] = useState(false);
+  const navigate = useNavigate();
+
   console.log("showDialog", showDialog, isLoading, cliStatus);
 
   const [fileList, setFileList] = useState<MarkdownFile[]>([]);
@@ -70,15 +74,41 @@ export default function MCP() {
     return () => window.removeEventListener("message", messageHandler);
   }, []);
   return (
-    <div>
-      <Button
-        onClick={handleGetFiles}
-        variant="outline"
-        className="h-16 w-full p-5 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-      >
-        Template call AI
-      </Button>
-      <FileEditor files={fileList} />
+    <div className="min-h-screen bg-vscode-background">
+      <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+              <Button
+                onClick={() => navigate("/")}
+                variant="outline"
+                className="h-16 flex flex-col items-center justify-center gap-2 border-[var(--vscode-editorWidget-border)] bg-[var(--vscode-editor-background)]/50 hover:bg-[var(--vscode-button-hoverBackground)] hover:text-[var(--vscode-button-foreground)]"
+              >
+                Back
+              </Button>
+            </div>
+            <Button
+              onClick={handleGetFiles}
+              variant="outline"
+              className="h-16 flex flex-col items-center justify-center gap-2 border-[var(--vscode-editorWidget-border)] bg-[var(--vscode-editor-background)]/50 hover:bg-[var(--vscode-button-hoverBackground)] hover:text-[var(--vscode-button-foreground)]"
+            >
+              Temple call AI MCP
+            </Button>
+          </div>
+
+          <FileEditor files={fileList} />
+        </CardContent>
+        <StatusDialog
+          open={showDialog}
+          onOpenChange={setShowDialog}
+          loading={isLoading}
+          status={cliStatus}
+          loadingTitle="Ai Executing..."
+          loadingMessage="Please wait while running command..."
+          successTitle="Ai Execution Successful"
+          errorTitle="Ai Execution Failed"
+        />
+      </Card>
     </div>
   );
 }

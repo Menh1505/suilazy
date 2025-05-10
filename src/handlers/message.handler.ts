@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { HandleSuiVersion } from "./command.handler";
-import { HandleClientPublish } from "./client.handler";
+// import { HandleClientPublish } from "./client.handler";
 import { SuiMessage, SuiCommand } from "../types/sui.message";
 import { SuiUpdateCli } from "../services/sui.service";
 import { SuiMoveBuild } from "../services/move/build.service";
@@ -12,6 +12,7 @@ import {
 import { SuiMoveNew } from "../services/move/new.service";
 import { SuiMoveTest } from "../services/move/test.service";
 import { createFileSystem } from "../lib/filesystem";
+import { SuiClientPublish } from "../services/client/publish.service";
 
 export function ReceiveMessageHandler(
   webview: vscode.Webview,
@@ -43,7 +44,7 @@ export function ReceiveMessageHandler(
       SuiMoveTest(webview);
       break;
     case SuiCommand.MOVE_PUBLISH:
-      HandleClientPublish(webview);
+      SuiClientPublish(webview, message.data);
       break;
     case SuiCommand.UPDATE_CLI:
       HandleCliUpdate(webview);

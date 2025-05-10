@@ -39,26 +39,17 @@ const router = createMemoryRouter([
         path: "mcp",
         element: <MCP />,
       },
+      { index: true, element: <App /> },
+      { path: "cli-not-found", element: <CliNotFound /> },
+      { path: "help", element: <SuiHelp /> },
       {
         path: "move",
         element: <SuiMove />,
         children: [
-          {
-            path: "help",
-            element: <MoveHelp />,
-          },
-          {
-            path: "new",
-            element: <MoveNew />,
-          },
-          {
-            path: "build",
-            element: <MoveBuild />,
-          },
-          {
-            path: "test",
-            element: <MoveTest />,
-          },
+          { path: "help", element: <MoveHelp /> },
+          { path: "new", element: <MoveNew /> },
+          { path: "build", element: <MoveBuild /> },
+          { path: "test", element: <MoveTest /> },
         ],
       },
 
@@ -66,33 +57,11 @@ const router = createMemoryRouter([
         path: "client",
         element: <SuiClient />,
         children: [
-          {
-            path: "help",
-            element: <ClientHelp />,
-          },
-          {
-            path: "publish",
-            element: <ClientPublish />,
-          },
-          {
-            path: "network",
-            element: <ClientNetwork />,
-          },
+          { path: "help", element: <ClientHelp /> },
+          { path: "publish", element: <ClientPublish /> },
+          { path: "network", element: <ClientNetwork /> },
         ],
       },
-
-      // Nếu bạn muốn bật lại Genesis / Network theo kiểu nested
-      /*
-      {
-        path: "publish",
-        element: <ClientPublish />
-      }
-      // {
-      //   path: "Genesis",
-      //   element: <SuiMove />,
-      //   children: [...]
-      // },
-      // */
     ],
   },
 ]);
