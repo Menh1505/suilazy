@@ -11,9 +11,11 @@ import {
 } from "../services/client/network.service";
 import { SuiMoveNew } from "../services/move/new.service";
 import { SuiMoveTest } from "../services/move/test.service";
+import { createFileSystem } from "../lib/filesystem";
 
 export function ReceiveMessageHandler(
   webview: vscode.Webview,
+  extensionUri: vscode.Uri,
   message: SuiMessage
 ) {
   switch (message.command) {
@@ -80,6 +82,15 @@ export function ReceiveMessageHandler(
         });
       }
       break;
+    case SuiCommand.GET_FILES: {
+      const fileSystem = createFileSystem(extensionUri);
+      const allFiles = fileSystem.getAllFiles();
+      webview.postMessage({
+        type: "cliStatus",
+        files: allFiles,
+      });
+      break;
+    }
   }
 }
 

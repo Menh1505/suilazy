@@ -65,7 +65,12 @@
     "@vscode/test-electron": "^2.4.1"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-separator": "^1.1.4",
-    "@radix-ui/react-switch": "^1.2.2"
+    "@radix-ui/react-switch": "^1.2.2",
+    "@types/axios": "^0.14.4",
+    "@types/yaml": "^1.9.7",
+    "axios": "^1.9.0",
+    "yaml": "^2.7.1"
   }
 }
