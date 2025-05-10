@@ -1,10 +1,31 @@
 import * as vscode from 'vscode';
 
+/**
+ * Defines the scope of storage.
+ * - `workspace`: Data is stored in the workspace state.
+ * - `global`: Data is stored in the global state.
+ * - `secret`: Data is stored securely in the secrets storage.
+ */
 export type StorageScope = 'workspace' | 'global' | 'secret';
 
+/**
+ * A provider for managing storage in a VS Code extension.
+ */
 export class StorageProvider {
+    /**
+     * Creates an instance of the StorageProvider.
+     * @param context The extension context provided by VS Code.
+     */
     constructor(private context: vscode.ExtensionContext) { }
 
+    /**
+     * Stores a value in the specified storage scope.
+     * @template T The type of the value to store.
+     * @param key The key to associate with the value.
+     * @param value The value to store.
+     * @param scope The scope of the storage. Defaults to `'workspace'`.
+     * @returns A promise that resolves when the value is stored.
+     */
     async set<T>(key: string, value: T, scope: StorageScope = 'workspace'): Promise<void> {
         switch (scope) {
             case 'workspace':
@@ -19,6 +40,14 @@ export class StorageProvider {
         }
     }
 
+    /**
+     * Retrieves a value from the specified storage scope.
+     * @template T The expected type of the value.
+     * @param key The key associated with the value.
+     * @param scope The scope of the storage. Defaults to `'workspace'`.
+     * @param defaultValue An optional default value to return if the key is not found.
+     * @returns A promise that resolves to the retrieved value or the default value if not found.
+     */
     async get<T>(key: string, scope: StorageScope = 'workspace', defaultValue?: T): Promise<T | undefined> {
         switch (scope) {
             case 'workspace':
@@ -36,6 +65,12 @@ export class StorageProvider {
         }
     }
 
+    /**
+     * Deletes a value from the specified storage scope.
+     * @param key The key associated with the value to delete.
+     * @param scope The scope of the storage. Defaults to `'workspace'`.
+     * @returns A promise that resolves when the value is deleted.
+     */
     async delete(key: string, scope: StorageScope = 'workspace'): Promise<void> {
         switch (scope) {
             case 'workspace':
