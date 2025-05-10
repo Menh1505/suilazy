@@ -12,7 +12,8 @@ function getOS(): OS {
     if (platform === 'linux') {
         try {
             const { execSync } = require('child_process');
-            const distro = execSync('hostnamectl --json=short').toString().trim();
+            const distro = JSON.parse(execSync('hostnamectl --json=short').toString().trim());
+            console.log('Distro:', distro.KernelVersion);
             if (distro.KernelVersion.toString().includes('Ubuntu')) {
                 return OS.UBUNTU;
             } else {
@@ -24,7 +25,7 @@ function getOS(): OS {
         }
     } else if (platform.toString().includes('win')) {
         return OS.WINDOWS;
-    } else if (platform === 'darwin') {
+    } else if (platform.toString().includes('darwin')) {
         return OS.MAC;
     } else {
         return OS.OTHER;
