@@ -33,6 +33,14 @@ function App() {
           >
             Sui Command
           </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            size="lg"
+            onClick={() => navigate("/mcp")}
+          >
+            Sui MCP
+          </Button>
 
           <div className="flex flex-row justify-center gap-4 mb-2">
             <a
@@ -48,14 +56,6 @@ function App() {
               Sui Lazy Guide
             </a>
           </div>
-          <Button
-            variant="outline"
-            className="w-full"
-            size="lg"
-            onClick={() => navigate("/mcp")}
-          >
-            Sui MCP
-          </Button>
         </CardContent>
       </Card>
     </div>

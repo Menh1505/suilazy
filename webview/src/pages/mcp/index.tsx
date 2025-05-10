@@ -74,7 +74,7 @@ export default function MCP() {
       <Button
         onClick={handleGetFiles}
         variant="outline"
-        className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+        className="h-16 w-full p-5 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
       >
         Template call AI
       </Button>
