@@ -2,19 +2,12 @@ import icon from './assets/sui-sui-logo.svg'
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card'
 import { Button } from './components/ui/button'
 import { useNavigate } from 'react-router-dom'
-import { vscodeApi } from './utils/utils'
-
-declare global {
-  interface Window {
-    vscode: vscodeApi
-  }
-}
 
 function App() {
   const navigate = useNavigate();
 
   return (
-    <div className='flex items-center justify-conter min-h-screen max-h-screen max-w-screen-xl mx-auto bg-black'>
+    <div className='flex items-center justify-center min-h-screen max-h-screen max-w-screen-xl mx-auto bg-vscode-background'>
       <Card className='w-full max-h-screen max-w-md border-none'>
         <CardHeader className='space-y-2 text-center'>
           <div className='flex flex-col items-center'>

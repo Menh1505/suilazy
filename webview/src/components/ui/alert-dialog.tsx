@@ -3,8 +3,7 @@
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
-import { cn } from "./utils";
-import { buttonVariants } from "./button";
+import { cn } from "../../lib/utils";
 
 const AlertDialog = AlertDialogPrimitive.Root;
 
@@ -104,7 +103,10 @@ const AlertDialogAction = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <AlertDialogPrimitive.Action
         ref={ref}
-        className={cn(buttonVariants(), className)}
+        className={cn(
+            "inline-flex items-center justify-center rounded-md bg-[var(--vscode-button-background)] px-4 py-2 text-sm font-medium text-[var(--vscode-button-foreground)] hover:bg-[var(--vscode-button-hoverBackground)] focus:outline-none focus:ring-2 focus:ring-[var(--vscode-focusBorder)] focus:ring-offset-2",
+            className
+        )}
         {...props}
     />
 ));
@@ -117,8 +119,7 @@ const AlertDialogCancel = React.forwardRef<
     <AlertDialogPrimitive.Cancel
         ref={ref}
         className={cn(
-            buttonVariants({ variant: "outline" }),
-            "mt-2 sm:mt-0",
+            "inline-flex items-center justify-center rounded-md border border-[var(--vscode-editorWidget-border)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--vscode-editor-foreground)] hover:bg-[var(--vscode-editor-selectionBackground)] focus:outline-none focus:ring-2 focus:ring-[var(--vscode-focusBorder)] focus:ring-offset-2 mt-2 sm:mt-0",
             className
         )}
         {...props}

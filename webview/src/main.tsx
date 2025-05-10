@@ -3,46 +3,52 @@ import { createRoot } from 'react-dom/client'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import './index.css'
 import App from './App.tsx'
-import SuiHelp from './pages/help.tsx';
-import CliNotFound from './pages/cliNotFound.tsx';
-import SuiMove from './pages/move.tsx';
-import MoveInit from './pages/move/init';
-import MoveBuild from './pages/move/build';
-import MoveTest from './pages/move/test';
-import MoveDeploy from './pages/move/deploy';
+import SuiHelp from './pages/sui_help/index.tsx';
+import MoveTest from './pages/sui_move/test.tsx';
+// import MoveDeploy from './pages/sui_client/deploy.tsx';
+import { RootLayout } from './RootLayout.tsx';
+import CliNotFound from './pages/installation/cliNotFound.tsx';
+import MoveNew from './pages/sui_move/new.tsx';
+import SuiMove from './pages/sui_move/index.tsx';
+import MoveHelp from './pages/sui_move/help.tsx';
+import MoveBuild from './pages/sui_move/build.tsx';
+import SuiClient from './pages/sui_client/index.tsx';
+import ClientNetwork from './pages/sui_client/network.tsx';
+import ClientHelp from './pages/sui_client/help.tsx';
+import ClientPublish from './pages/sui_client/publish.tsx';
+
+const vscode = window.vscode;
+
 
 const router = createMemoryRouter([
   {
-    path: '/',
-    element: <App />
-  },
-  {
-    path: 'cli-not-found',
-    element: <CliNotFound />
-  },
-  {
-    path: 'help',
-    element: <SuiHelp />
-  },
-  {
-    path: 'move',
-    element: <SuiMove />
-  },
-  {
-    path: 'move/init', 
-    element: <MoveInit />
-  },
-  {
-    path: 'move/build', 
-    element: <MoveBuild />
-  },
-  {
-    path: 'move/deploy', 
-    element: <MoveDeploy />
-  },
-  {
-    path: 'move/test', 
-    element: <MoveTest />
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <App /> },
+      { path: "cli-not-found", element: <CliNotFound /> },
+      { path: "help", element: <SuiHelp /> },
+      {
+        path: "move",
+        element: <SuiMove />,
+        children: [
+          { path: "help", element: <MoveHelp /> },
+          { path: "new", element: <MoveNew /> },
+          { path: "build", element: <MoveBuild /> },
+          { path: "test", element: <MoveTest /> },
+        ]
+      },
+
+      {
+        path: "client",
+        element: <SuiClient />,
+        children: [
+          { path: "help", element: <ClientHelp /> },
+          { path: "publish", element: <ClientPublish /> },
+          { path: "network", element: <ClientNetwork /> },
+        ]
+      }
+    ]
   }
 ]);
 
