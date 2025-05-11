@@ -1,0 +1,1 @@
+Please call function with moduleAddress=0x05452fa342fdeb4d6dca674d335cdfb174fc289e85fd217b10d40b94a6804e60 moduleName=message functionName=set_message args=['Hello from AI!'] Show me the transaction hash when done

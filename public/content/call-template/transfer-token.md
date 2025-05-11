@@ -1,0 +1,5 @@
+I want to call function with
+moduleaddress=a02a821ada9af357949c3fd934ef6da80c8a31d73c8da0e152f4f63eb03e327f
+modulename=fa_coin
+function=transfer
+args=address:a02a821ada9af357949c3fd934ef6da80c8a31d73c8da0e152f4f63eb03e327f address:50e2e9cf31c37a6535eb74f38c3e2ec15e67eb5875304cf572647f2037d582cc u64:1000000

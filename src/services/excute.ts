@@ -21,11 +21,8 @@ export default function processCLI(
 
     proc.on("close", (code) => {
       if (code !== 0) {
-        console.log("chekc reject: ", output);
-
         return reject(output);
       }
-      console.log("chekc: ", output);
       resolve(output);
     });
   });

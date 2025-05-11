@@ -1,23 +1,22 @@
 import * as vscode from "vscode";
 import { HandleSuiVersion } from "./command.handler";
-import {
-  HandleMoveNew,
-  HandleMoveBuild,
-  HandleMoveTest,
-} from "./move.handler";
-import {
-  HandleClientPublish
-} from "./client.handler";
-import {
-  HandleFetchEnvironments,
-  HandleSwitchEnvironment,
-  HandleNewEnvironment,
-} from "./network.handler";
+// import { HandleClientPublish } from "./client.handler";
 import { SuiMessage, SuiCommand } from "../types/sui.message";
 import { SuiUpdateCli } from "../services/sui.service";
+import { SuiMoveBuild } from "../services/move/build.service";
+import {
+  SuiClientEnvs,
+  SuiClientNewEnv,
+  SuiClientSwitch,
+} from "../services/client/network.service";
+import { SuiMoveNew } from "../services/move/new.service";
+import { SuiMoveTest } from "../services/move/test.service";
+import { createFileSystem } from "../lib/filesystem";
+import { SuiClientPublish } from "../services/client/publish.service";
 
 export function ReceiveMessageHandler(
   webview: vscode.Webview,
+  extensionUri: vscode.Uri,
   message: SuiMessage
 ) {
   switch (message.command) {
@@ -30,7 +29,7 @@ export function ReceiveMessageHandler(
         message.data !== null &&
         "projectName" in message.data
       ) {
-        HandleMoveNew(webview, message.data);
+        SuiMoveNew(webview, message.data);
       } else {
         webview.postMessage({
           type: "error",
@@ -39,23 +38,26 @@ export function ReceiveMessageHandler(
       }
       break;
     case SuiCommand.MOVE_BUILD:
-      HandleMoveBuild(webview, message.data);
+      SuiMoveBuild(webview, message.data);
       break;
     case SuiCommand.MOVE_TEST:
-      HandleMoveTest(webview);
+      SuiMoveTest(webview);
       break;
     case SuiCommand.MOVE_PUBLISH:
-      HandleClientPublish(webview);
+      SuiClientPublish(webview, message.data);
       break;
     case SuiCommand.UPDATE_CLI:
       HandleCliUpdate(webview);
       break;
     case SuiCommand.CLIENT_ENVS:
-      HandleFetchEnvironments(webview);
+      SuiClientEnvs(webview);
       break;
     case SuiCommand.CLIENT_SWITCH:
-      if (typeof message.data === "string") {
-        HandleSwitchEnvironment(webview, message.data);
+      console.log("check newwork env", message.data.env);
+      if (typeof message.data.env === "string") {
+        console.log("check newwork trong", message.data);
+
+        SuiClientSwitch(webview, message.data.env);
       } else {
         webview.postMessage({
           type: "error",
@@ -70,7 +72,7 @@ export function ReceiveMessageHandler(
         "alias" in message.data &&
         "rpc" in message.data
       ) {
-        HandleNewEnvironment(
+        SuiClientNewEnv(
           webview,
           message.data as { alias: string; rpc: string }
         );
@@ -81,6 +83,15 @@ export function ReceiveMessageHandler(
         });
       }
       break;
+    case SuiCommand.GET_FILES: {
+      const fileSystem = createFileSystem(extensionUri);
+      const allFiles = fileSystem.getAllFiles();
+      webview.postMessage({
+        type: "cliStatus",
+        files: allFiles,
+      });
+      break;
+    }
   }
 }
 

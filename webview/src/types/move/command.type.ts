@@ -8,6 +8,7 @@ export type SuiCommandType = {
   CLIENT_ENVS: "sui.client.envs";
   CLIENT_SWITCH: "sui.client.switch";
   CLIENT_NEW_ENV: "sui.client.new-env";
+  GET_FILES: "getfiles";
 };
 
 export const SuiCommand: SuiCommandType = {
@@ -20,6 +21,7 @@ export const SuiCommand: SuiCommandType = {
   CLIENT_ENVS: "sui.client.envs",
   CLIENT_SWITCH: "sui.client.switch",
   CLIENT_NEW_ENV: "sui.client.new-env",
+  GET_FILES: "getfiles",
 } as const;
 
 export type SuiCommandValues = SuiCommandType[keyof SuiCommandType];

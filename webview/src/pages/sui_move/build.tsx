@@ -6,7 +6,12 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Switch } from "../../components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../../components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "../../components/ui/tooltip";
 import { BackButton } from "../../components/ui/back-button";
 import { Loader2 } from "lucide-react";
 import { StatusDialog } from "../../components/status-dialog";
@@ -15,7 +20,10 @@ export default function MoveBuild() {
   const navigate = useNavigate();
   const [building, setBuilding] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [cliStatus, setCliStatus] = useState<{ type: "success" | "error"; message: string }>({
+  const [cliStatus, setCliStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  }>({
     type: "success",
     message: "",
   });
@@ -43,7 +51,8 @@ export default function MoveBuild() {
     const { name, value, type } = e.target;
     setInitArgs((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -224,18 +233,18 @@ export default function MoveBuild() {
                     {Object.entries(initArgs).map(([key, value]) => (
                       <div
                         key={key}
-                        className={`flex items-center justify-between p-2 rounded transition-colors ${value
-                            ? "bg-[var(--vscode-button-background)]/10 border border-[var(--vscode-button-background)]/20"
-                            : "hover:bg-[var(--vscode-editor-background)]/30"
-                          }`}
+                        className={`flex items-center justify-between p-2 rounded transition-colors ${
+                          value
+                            ? "bg-blue-600/10 border border-blue-500/20"
+                            : "hover:bg-gray-700/30"
+                        }`}
                       >
                         <Tooltip>
                           <TooltipTrigger className="flex items-center space-x-2">
                             <div
-                              className={`w-2 h-2 rounded-full ${value
-                                  ? "bg-[var(--vscode-button-foreground)]"
-                                  : "bg-[var(--vscode-editor-foreground)]/50"
-                                }`}
+                              className={`w-2 h-2 rounded-full ${
+                                value ? "bg-blue-400" : "bg-gray-500"
+                              }`}
                             />
                             <span className="text-sm text-[var(--vscode-editor-foreground)]">
                               {key
@@ -260,10 +269,11 @@ export default function MoveBuild() {
                           onCheckedChange={(checked) =>
                             setInitArgs((prev) => ({ ...prev, [key]: checked }))
                           }
-                          className={`${value
+                          className={`${
+                            value
                               ? "bg-[var(--vscode-button-background)]"
                               : "bg-[var(--vscode-editorWidget-border)]"
-                            }`}
+                          }`}
                         />
                       </div>
                     ))}
@@ -276,10 +286,11 @@ export default function MoveBuild() {
           <div className="mt-6">
             {cliStatus.message && (
               <div
-                className={`p-4 rounded-lg ${cliStatus.type === "success"
-                    ? "bg-[var(--vscode-button-background)]/10 border border-[var(--vscode-button-background)]"
-                    : "bg-[var(--vscode-errorForeground)]/10 border border-[var(--vscode-errorForeground)]"
-                  }`}
+                className={`p-4 rounded-lg ${
+                  cliStatus.type === "success"
+                    ? "bg-green-900/20 border border-green-800"
+                    : "bg-red-900/20 border border-red-800"
+                }`}
               >
                 <p className="text-sm text-[var(--vscode-editor-foreground)]">
                   {cliStatus.type === "success" ? "✅ " : "❌ "}
@@ -302,7 +313,7 @@ export default function MoveBuild() {
         errorTitle="Build Failed"
         successAction={{
           label: "Go to Publish",
-          onClick: () => navigate("/publish"),
+          onClick: () => navigate("/client/publish"),
         }}
       />
     </TooltipProvider>

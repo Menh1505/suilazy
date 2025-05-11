@@ -1,30 +1,44 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import './index.css'
-import App from './App.tsx'
-import SuiHelp from './pages/sui_help/index.tsx';
-import MoveTest from './pages/sui_move/test.tsx';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import "./index.css";
+import App from "./App.tsx";
+import SuiHelp from "./pages/sui_help/index.tsx";
+import MoveTest from "./pages/sui_move/test.tsx";
 // import MoveDeploy from './pages/sui_client/deploy.tsx';
-import { RootLayout } from './RootLayout.tsx';
-import CliNotFound from './pages/installation/cliNotFound.tsx';
-import MoveNew from './pages/sui_move/new.tsx';
-import SuiMove from './pages/sui_move/index.tsx';
-import MoveHelp from './pages/sui_move/help.tsx';
-import MoveBuild from './pages/sui_move/build.tsx';
-import SuiClient from './pages/sui_client/index.tsx';
-import ClientNetwork from './pages/sui_client/network.tsx';
-import ClientHelp from './pages/sui_client/help.tsx';
-import ClientPublish from './pages/sui_client/publish.tsx';
-
-const vscode = window.vscode;
-
+import { RootLayout } from "./RootLayout.tsx";
+import CliNotFound from "./pages/installation/cliNotFound.tsx";
+import MoveNew from "./pages/sui_move/new.tsx";
+import SuiMove from "./pages/sui_move/index.tsx";
+import MoveHelp from "./pages/sui_move/help.tsx";
+import MoveBuild from "./pages/sui_move/build.tsx";
+import SuiClient from "./pages/sui_client/index.tsx";
+import ClientNetwork from "./pages/sui_client/network.tsx";
+import ClientHelp from "./pages/sui_client/help.tsx";
+import ClientPublish from "./pages/sui_client/publish.tsx";
+import MCP from "./pages/mcp/index.tsx";
 
 const router = createMemoryRouter([
   {
     path: "/",
     element: <RootLayout />,
     children: [
+      {
+        index: true,
+        element: <App />,
+      },
+      {
+        path: "cli-not-found",
+        element: <CliNotFound />,
+      },
+      {
+        path: "help",
+        element: <SuiHelp />,
+      },
+      {
+        path: "mcp",
+        element: <MCP />,
+      },
       { index: true, element: <App /> },
       { path: "cli-not-found", element: <CliNotFound /> },
       { path: "help", element: <SuiHelp /> },
@@ -36,7 +50,7 @@ const router = createMemoryRouter([
           { path: "new", element: <MoveNew /> },
           { path: "build", element: <MoveBuild /> },
           { path: "test", element: <MoveTest /> },
-        ]
+        ],
       },
 
       {
@@ -46,14 +60,14 @@ const router = createMemoryRouter([
           { path: "help", element: <ClientHelp /> },
           { path: "publish", element: <ClientPublish /> },
           { path: "network", element: <ClientNetwork /> },
-        ]
-      }
-    ]
-  }
+        ],
+      },
+    ],
+  },
 ]);
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>,
-)
+  </StrictMode>
+);
