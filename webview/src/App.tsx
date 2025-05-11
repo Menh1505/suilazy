@@ -14,12 +14,12 @@ function App() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex items-center justify-center min-h-screen max-h-screen max-w-screen-xl mx-auto bg-vscode-background">
-      <Card className="w-full max-h-screen max-w-md border-none">
+    <div className="flex items-center justify-center min-h-screen max-h-screen max-w-screen-xl mx-auto bg-vscode-background text-vscode-foreground">
+      <Card className="w-full h-full border-0 bg-vscode-background">
         <CardHeader className="space-y-2 text-center">
           <div className="flex flex-col items-center">
             <img src={icon} alt="icon" className="w-48 h-48" />
-            <CardTitle className="mt-4 font-pacifico text-6xl">
+            <CardTitle className="mt-4 font-pacifico text-6xl text-vscode-foreground">
               Sui Lazy
             </CardTitle>
           </div>
@@ -27,7 +27,7 @@ function App() {
         <CardContent className="space-y-4">
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full border-vscode-buttonBackground text-vscode-buttonForeground hover:bg-vscode-buttonHoverBackground"
             size="lg"
             onClick={() => navigate("/help")}
           >
@@ -35,7 +35,7 @@ function App() {
           </Button>
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full border-vscode-buttonBackground text-vscode-buttonForeground hover:bg-vscode-buttonHoverBackground"
             size="lg"
             onClick={() => navigate("/mcp")}
           >
@@ -45,13 +45,13 @@ function App() {
           <div className="flex flex-row justify-center gap-4 mb-2">
             <a
               href="https://docs.sui.io/"
-              className="flex-1 h-10 flex items-center justify-center gap-2"
+              className="flex-1 h-10 flex items-center justify-center gap-2 text-vscode-foreground hover:text-vscode-focusBorder"
             >
               Sui Documents
             </a>
             <a
               href="https://movelazy-landing-page-six.vercel.app/"
-              className="flex-1 h-10 flex items-center justify-center gap-2"
+              className="flex-1 h-10 flex items-center justify-center gap-2 text-vscode-foreground hover:text-vscode-focusBorder"
             >
               Sui Lazy Guide
             </a>
